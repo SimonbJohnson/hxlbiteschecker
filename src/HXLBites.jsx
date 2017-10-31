@@ -29,9 +29,7 @@ class TableBites extends Component {
   render(){
 
     let bites = [];
-    console.log(this.props);
     this.props.bites.forEach(function(bite,i){
-      console.log('and here');
       let key = 'table'+i;
       bites.push(<div key={key} dangerouslySetInnerHTML={{__html: bite.html}}></div>)
     });
@@ -52,9 +50,9 @@ class ChartBites extends Component {
     this.props.bites.forEach(function(chart,i){
       let key = 'chart'+i
       if(chart.subtype==='pie'){
-        bites.push(<Pie3WChart key={key} data={chart.bite} />);
+        bites.push(<Pie3WChart key={key} data={chart.bite} title={chart.title}/>);
       } else {
-        bites.push(<Row3WChart key={key} data={chart.bite} />);
+        bites.push(<Row3WChart key={key} data={chart.bite} title={chart.title}/>);
       }
     });
 
@@ -125,17 +123,20 @@ class Pie3WChart extends Component {
     let colors = ['#EF5350','#FFAB00','#43A047','#90CAF9'];
 
     return (
-      <PieChart width={350} height={400} isAnimationActive={false}>
-        <Pie data={this.props.data} cx="50%" cy="50%" outerRadius={60} label={({name, value})=>`${name}: ${value}`} dataKey="value" labelLine={false} isAnimationActive={false}>
-          {
-            this.props.data.map((d, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index]} />
-            ))
-          }
-        </Pie>
-        <Tooltip />
-        <Legend />
-      </PieChart>
+      <div>
+        <p>{this.props.title}</p>
+        <PieChart width={350} height={400} isAnimationActive={false}>
+          <Pie data={this.props.data} cx="50%" cy="50%" outerRadius={60} label={({name, value})=>`${name}: ${value}`} dataKey="value" labelLine={false} isAnimationActive={false}>
+            {
+              this.props.data.map((d, index) => (
+                <Cell key={`cell-${index}`} fill={colors[index]} />
+              ))
+            }
+          </Pie>
+          <Tooltip />
+          <Legend />
+        </PieChart>
+      </div>
     )
   }
 }
@@ -147,15 +148,18 @@ class Row3WChart extends Component {
     let color = '#EF5350';
 
     return (
-      <BarChart width={350} height={400} data={this.props.data}
-            margin={{top: 5, right: 20, left: 50, bottom: 5}} layout='vertical'>
-       <XAxis type="number" allowDecimals={false} />
-       <YAxis type="category" dataKey="name" />
-       <CartesianGrid strokeDasharray="3 3" />
-       <Tooltip />
-       <Legend />
-       <Bar dataKey="value" fill={color} isAnimationActive={false} />
-      </BarChart>
+      <div>
+        <p>{this.props.title}</p>
+        <BarChart width={350} height={400} data={this.props.data}
+              margin={{top: 5, right: 20, left: 50, bottom: 5}} layout='vertical'>
+         <XAxis type="number" allowDecimals={false} />
+         <YAxis type="category" dataKey="name" />
+         <CartesianGrid strokeDasharray="3 3" />
+         <Tooltip />
+         <Legend />
+         <Bar dataKey="value" fill={color} isAnimationActive={false} />
+        </BarChart>
+      </div>
     );
   }
 }
@@ -205,7 +209,6 @@ class HXLBites extends Component {
       tableBites.forEach(function(bite){
         bite.html = hxlBites.render(null,bite);
       });
-      console.log(tableBites);
     }
 
 

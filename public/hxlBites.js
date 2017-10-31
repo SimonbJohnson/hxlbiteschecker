@@ -2,19 +2,52 @@ let hxlBites = {
 
 	_data: [],
 	_headers: {},
+	timeSeries: false,
+	timeSeriesFilter: '',
+	timeSeriesFilterHeader: '',
 
 	data: function(data){
 		this._data = data;
+		this._data = this.checkTimeSeriesAndFilter(data);
 		return this;
 	},
 
-	checkTimeSeriesAndFilter(){
-
+	checkTimeSeriesAndFilter(data){
+		let self = this;
+		let matches = self._getIngredientValues({'name':'#date','tags':['#date-update']},self._data);
+		let timeSeries = true;
+		let filterValue='';
+		let filterHeader = '';
+		let filterCol = 0;
+		matches.forEach(function(match){
+			let keyValues = self._varFuncKeyValue(match);
+			let length = keyValues.length;
+			if(keyValues[length-1].value<3){
+				timeSeries = false;
+			} else {
+				filterValue = keyValues[length-1].key;
+				filterCol = match.col;
+				filterHeader = match.header;
+			}
+		});
+		if(timeSeries){
+			let headers = data.slice(0, 2);
+			data = data.slice(2,data.length);
+			data = self._filterData(data,filterCol,filterValue);
+			data = headers.concat(data);
+		}
+		self.timeSeries = timeSeries;
+		self.timeSeriesFilter = filterValue;
+		self.timeSeriesFilterHeader = filterHeader;
+		return data;
 	},
 
 	getTextBites: function(){
 		let self = this;
 		let bites = [];
+		if(this.timeSeries){
+			bites.push({'type':'text','subtype':'intro','priority':10,'bite':'Data filtered for on '+this.timeSeriesFilterHeader+' for '+this.timeSeriesFilter, 'id':'text0000'});
+		}
 		this._textBites.forEach(function(bite,i){
 			let distinctOptions = {};
 			bite.ingredients.forEach(function(ingredient){
@@ -42,6 +75,8 @@ let hxlBites = {
 			});
 			let matchingValues = self._checkCriteria(bite.criteria,distinctOptions);
 			if(matchingValues !== false){
+				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
+				let title = bite.id + ' - ' + self._generateTextBite(bite.title,[titleVariables]);
 				let variables = self._getTableVariables(self._data,bite,matchingValues);
 				let newBite = self._generateTableBite(bite.table,variables);
 				bites.push({'type':'table','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id});
@@ -61,9 +96,12 @@ let hxlBites = {
 			});
 			let matchingValues = self._checkCriteria(bite.criteria,distinctOptions);
 			if(matchingValues !== false){
+				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
+				let title = bite.id + ' - ' + self._generateTextBite(bite.title,[titleVariables]);
 				let variables = self._getTableVariables(self._data,bite,matchingValues);
 				let newBite = self._generateChartBite(bite.chart,variables);
-				bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id});
+				self._generateTextBite(bite.title,variables);
+				bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':title});
 			}			
 		});
 		return bites;
@@ -99,6 +137,19 @@ let hxlBites = {
 			}		
 		});
 		return bites;
+	},
+
+	_getTitleVariables: function(variables,matchingValues){
+		let titleVariables = [];
+		variables.forEach(function(v){
+					if(v.indexOf('(')==-1){
+						let header = matchingValues[v][0].header;
+						titleVariables.push(header);
+					} else {
+						titleVariables.push('');
+					}
+				});
+		return titleVariables;
 	},		
 
 	_getIngredientValues: function(ingredient,data){
@@ -107,7 +158,7 @@ let hxlBites = {
 		dataset.withColumns(ingredient.tags).forEach(function(row,col,rowindex){				
 			row.values.forEach(function(value,index){
 				//At the moment only include first tag that meets requirement.
-				if(index==0){
+				if(index>-1){
 					if(rowindex==0){
 						ingredientDistinct[index] = {'tag':'','header':'','uniqueValues':[],'values':[],'col':''};
 						ingredientDistinct[index].tag = col.displayTags[index];
@@ -196,7 +247,26 @@ let hxlBites = {
 							col[index+1] = keyValue.value;
 						});
 					}
+					if(func == 'sum'){
+						let sumValue = variable.split('(')[1].split(')')[0];
+						let match = matchingValues[sumValue][0];
+						col[0] = 'Value';
+						firstCol.forEach(function(value,index){
+							if(index>0){
+								let filteredData = self._filterData(data,keyMatch.col,value);
+								let sum = 0;
+								filteredData.forEach(function(row,index){
+									let value = Number(row[match.col]);
+									if(value!=NaN){
+										sum += value;
+									}									
+								});
+								col[index] = sum;
+							}
+						});						
+					}					
 				} else {
+					// use this code for sums!
 					let match = matchingValues[variable][0];
 					col[0] = match.header;
 					firstCol.forEach(function(value,index){
