@@ -13,7 +13,7 @@ class DataInputs extends Component {
 
   loadData(){
     let self = this;
-    let url = 'https://proxy.hxlstandard.org/data.json?force=on&url=' + this.state.hxlURL;
+    let url = 'https://proxy.hxlstandard.org/data.json?force=on&url=' + encodeURIComponent(this.state.hxlURL);
     axios
       .get(url)
       .then(function(result) {

@@ -31,7 +31,25 @@ class TableBites extends Component {
     let bites = [];
     this.props.bites.forEach(function(bite,i){
       let key = 'table'+i;
-      bites.push(<div key={key} dangerouslySetInnerHTML={{__html: bite.html}}></div>)
+      bites.push(<div  key={key}>{bite.id} - {bite.title}<div dangerouslySetInnerHTML={{__html: bite.html}}></div></div>)
+    });
+
+    return (
+      <div>
+        {bites}
+      </div>
+    )
+  }
+}
+
+class CrossTableBites extends Component {
+
+  render(){
+
+    let bites = [];
+    this.props.bites.forEach(function(bite,i){
+      let key = 'crosstable'+i;
+      bites.push(<div key={key}>{bite.id} - {bite.title}<div dangerouslySetInnerHTML={{__html: bite.html}}></div></div>)
     });
 
     return (
@@ -190,6 +208,7 @@ class HXLBites extends Component {
     let chartBites = [];
     let mapBites = [];
     let tableBites = [];
+    let crossTableBites = [];
 
     if(this.props.data!=null){
       textBites = hxlBites.data(this.props.data).getTextBites();
@@ -209,6 +228,10 @@ class HXLBites extends Component {
       tableBites.forEach(function(bite){
         bite.html = hxlBites.render(null,bite);
       });
+      crossTableBites = hxlBites.getCrossTableBites();
+      crossTableBites.forEach(function(bite){
+        bite.html = hxlBites.render(null,bite);
+      });
     }
 
 
@@ -222,6 +245,8 @@ class HXLBites extends Component {
         <MapBites bites={mapBites} />
         <h1>Tables</h1>
         <TableBites bites={tableBites} />
+        <h1>Cross Tables</h1>
+        <CrossTableBites bites={crossTableBites} />
       </div>
     );
   }

@@ -108,5 +108,16 @@ hxlBites._chartBites = [
 'chart':'rows(10)',
 'title':'Top 10 of {1} by count',
 'priority': 8,
+},
+{
+'id':'chart0011',
+'type':'chart',
+'subType':'row',
+'ingredients':[{'name':'indicator','tags':['#indicator','#severity','#status']}],
+'criteria':['indicator > 1','indicator < 10'],
+'variables': ['indicator', 'count()'],
+'chart':'',
+'title':'Count of {1}',
+'priority': 8,
 }
 ];

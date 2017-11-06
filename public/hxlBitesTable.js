@@ -84,7 +84,7 @@ hxlBites._tableBites = [
 'criteria':['what > 10'],
 'variables': ['what', 'count()'],
 'table':'',
-'title':'',
+'title':'Count of {1}',
 'priority': 8,
 }
 ]

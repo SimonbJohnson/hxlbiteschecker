@@ -2,3 +2,61 @@
 	width:600px;
 	margin-right:20px;
 }
+
+.crosstable0{
+	color:#000;
+	background-color:#fff;
+	text-align:right;
+	padding-right:5px;
+}
+
+.crosstable1{
+	color:#000;
+	background-color:#FFCDD2;
+	text-align:right;
+	padding-right:5px;
+}
+
+.crosstable2{
+	color:#000;
+	background-color:#EF9A9A;
+	text-align:right;
+	padding-right:5px;
+}
+
+.crosstable3{
+	color:#FFF;
+	background-color:#F44336;
+	text-align:right;
+	padding-right:5px;
+}
+
+.crosstable4{
+	color:#FFF;
+	background-color:#D32F2F;
+	text-align:right;
+	padding-right:5px;
+}
+
+.crosstable5{
+	color:#FFF;
+	background-color:#B71C1C;
+	text-align:right;
+	padding-right:5px;
+}
+
+td {
+	min-width:100px;
+}
+
+.crosstable td {
+	height:35px;
+}
+
+.crosstable {
+	margin-bottom:20px;
+}
+
+.table {
+	margin-bottom:20px;
+}
