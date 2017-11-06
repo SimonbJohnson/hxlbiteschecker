@@ -19,6 +19,9 @@ let hxlBites = {
 		let filterValue='';
 		let filterHeader = '';
 		let filterCol = 0;
+		if(matches.length==0){
+			timeSeries = false;
+		}
 		matches.forEach(function(match){
 			let keyValues = self._varFuncKeyValue(match);
 			let length = keyValues.length;
@@ -76,14 +79,35 @@ let hxlBites = {
 			let matchingValues = self._checkCriteria(bite.criteria,distinctOptions);
 			if(matchingValues !== false){
 				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
-				let title = bite.id + ' - ' + self._generateTextBite(bite.title,[titleVariables]);
+				let title = self._generateTextBite(bite.title,titleVariables);
 				let variables = self._getTableVariables(self._data,bite,matchingValues);
 				let newBite = self._generateTableBite(bite.table,variables);
-				bites.push({'type':'table','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id});
+				bites.push({'type':'table','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':title});
 			}			
 		});
 		return bites;
 	},
+
+	getCrossTableBites: function(){
+		let self = this;
+		let bites = [];
+		this._crossTableBites.forEach(function(bite,i){
+			let distinctOptions = {};
+			bite.ingredients.forEach(function(ingredient){
+				distinctValues = self._getIngredientValues(ingredient,self._data);
+				distinctOptions[ingredient.name] = distinctValues;
+			});
+			let matchingValues = self._checkCriteria(bite.criteria,distinctOptions);
+			if(matchingValues !== false){
+				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
+				let title = self._generateTextBite(bite.title,titleVariables);
+				let variables = self._getCrossTableVariables(self._data,bite,matchingValues);
+				let newBite = self._generateTableBite(bite.table,variables);
+				bites.push({'type':'crosstable','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':title});
+			}			
+		});
+		return bites;
+	},	
 
 	getChartBites: function(){
 		let self = this;
@@ -97,10 +121,9 @@ let hxlBites = {
 			let matchingValues = self._checkCriteria(bite.criteria,distinctOptions);
 			if(matchingValues !== false){
 				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
-				let title = bite.id + ' - ' + self._generateTextBite(bite.title,[titleVariables]);
+				let title = self._generateTextBite(bite.title,titleVariables);
 				let variables = self._getTableVariables(self._data,bite,matchingValues);
 				let newBite = self._generateChartBite(bite.chart,variables);
-				self._generateTextBite(bite.title,variables);
 				bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':title});
 			}			
 		});
@@ -144,7 +167,7 @@ let hxlBites = {
 		variables.forEach(function(v){
 					if(v.indexOf('(')==-1){
 						let header = matchingValues[v][0].header;
-						titleVariables.push(header);
+						titleVariables.push([header]);
 					} else {
 						titleVariables.push('');
 					}
@@ -285,6 +308,58 @@ let hxlBites = {
 				}
 				table.push(col);
 			}
+		});
+		return table;
+	},
+
+	_getCrossTableVariables: function(data,bite,matchingValues){
+
+		//needs large efficieny improvements
+		let self = this;
+		let table = [];
+		let keyMatch1 = matchingValues[bite.variables[0]][0];
+		let keyValues1 = this._varFuncKeyValue(keyMatch1);
+		let keyMatch2 = matchingValues[bite.variables[1]][0];
+		let keyValues2 = this._varFuncKeyValue(keyMatch2);
+		let firstCol = [''];
+		keyValues1.forEach(function(keyValue){
+			firstCol.push(keyValue.key); 
+		});
+		let maxCount = data.length;
+		table.push(firstCol);
+		keyValues2.forEach(function(keyValue,index){
+			let col = new Array(firstCol.length).fill(0);
+			col[0] = keyValue.key;
+			firstCol.forEach(function(value,index){
+				if(index>0){
+					let filteredData = self._filterData(data,keyMatch1.col,value);
+					let maxRowCount = filteredData.length;
+					filteredData = self._filterData(filteredData,keyMatch2.col,keyValue.key);
+					let func = bite.variables[2].split('(')[0];
+					if(func == 'percentCount'){
+						col[index] = (filteredData.length/maxCount*100).toFixed(2);;
+					}
+					if(func == 'percentRowCount'){
+						col[index] = (filteredData.length/maxRowCount*100).toFixed(2);;
+					}
+					if(func == 'count'){
+						col[index] = filteredData.length;
+					}
+					if(func == 'sum'){
+						let sumValue = variable.split('(')[1].split(')')[0];
+						let match = matchingValues[sumValue][0];
+						let sum = 0;
+						filteredData.forEach(function(row,index){
+							let value = Number(row[match.col]);
+							if(value!=NaN){
+								sum += value;
+							}									
+						});
+						col[index] = sum;					
+					}
+				}						
+			});					
+			table.push(col);
 		});
 		return table;
 	},
