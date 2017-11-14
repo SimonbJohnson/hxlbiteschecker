@@ -163,6 +163,8 @@ let hxlBites = {
 	},
 
 	_getTitleVariables: function(variables,matchingValues){
+		console.log(variables);
+		console.log(matchingValues);
 		let titleVariables = [];
 		variables.forEach(function(v){
 					if(v.indexOf('(')==-1){
@@ -213,7 +215,7 @@ let hxlBites = {
 	},
 
 	_parseCriterion: function(criterion){
-		let operations = ['<','>'];
+		let operations = ['<','>','!'];
 		let operation = -1;
 		operations.forEach(function(op){
 			if(criterion.indexOf(op)>-1){
@@ -244,6 +246,13 @@ let hxlBites = {
 			}
 			return true;
 		});
+		if(criterion.operation == '!'){
+			if(ingredientValues[criterion.variable].length==0){
+				ingredientValues[criterion.variable].push({tag: "#value", header: "Placeholder", uniqueValues: [], values: [], col: -1});
+			} else {
+				ingredientValues[criterion.variable] = [];
+			}
+		}
 		return ingredientValues;
 	},
 
@@ -346,7 +355,7 @@ let hxlBites = {
 						col[index] = filteredData.length;
 					}
 					if(func == 'sum'){
-						let sumValue = variable.split('(')[1].split(')')[0];
+						let sumValue = bite.variables[2].split('(')[1].split(')')[0];
 						let match = matchingValues[sumValue][0];
 						let sum = 0;
 						filteredData.forEach(function(row,index){
