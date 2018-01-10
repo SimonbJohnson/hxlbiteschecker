@@ -143,14 +143,17 @@ let hxlBites = {
 			if(matchingValues !== false){
 				let tag = bite.ingredients[0].tags[0];
 				let location = null;
-				let level = 0;
+				let level = -1;
 				if(tag=='#country+code'){
-					location = 'world';
+					level = 0;
 				}
-				if(location!=null){
+				if(tag=='#adm1+code'){
+					level = 1;
+				}
+				if(level>-1){
 					let keyVariable = bite.variables[0]
 					let values = matchingValues[keyVariable][0].values;
-					let mapCheck = self._checkMapCodes(location,level,values);
+					let mapCheck = self._checkMapCodes(level,values);
 					if(mapCheck.percent>0.5){
 						let variables = self._getTableVariables(self._data,bite,matchingValues);
 						let newBite = self._generateMapBite(bite.map,variables,location,level);
@@ -213,7 +216,7 @@ let hxlBites = {
 	},
 
 	_parseCriterion: function(criterion){
-		let operations = ['<','>'];
+		let operations = ['<','>','!'];
 		let operation = -1;
 		operations.forEach(function(op){
 			if(criterion.indexOf(op)>-1){
@@ -244,6 +247,13 @@ let hxlBites = {
 			}
 			return true;
 		});
+		if(criterion.operation == '!'){
+			if(ingredientValues[criterion.variable].length==0){
+				ingredientValues[criterion.variable].push({tag: "#value", header: "Placeholder", uniqueValues: [], values: [], col: -1});
+			} else {
+				ingredientValues[criterion.variable] = [];
+			}
+		}
 		return ingredientValues;
 	},
 
@@ -346,7 +356,7 @@ let hxlBites = {
 						col[index] = filteredData.length;
 					}
 					if(func == 'sum'){
-						let sumValue = variable.split('(')[1].split(')')[0];
+						let sumValue = bite.variables[2].split('(')[1].split(')')[0];
 						let match = matchingValues[sumValue][0];
 						let sum = 0;
 						filteredData.forEach(function(row,index){
@@ -421,33 +431,30 @@ let hxlBites = {
 		return variableList;
 	},
 
-	_checkMapCodes: function(location,level,values){
+	_checkMapCodes: function(level,values){
 		let maxMatch = 0;
-		let maxCode = 0;
-		let name = location+'_'+level;
-		let maxValues = [];
-		hxlBites._mapValues[name].codes.forEach(function(code){
-			let match = 0;
-			values.forEach(function(value,i){
-				if(code.values.indexOf(value)>-1){
-					match++;
+		let maxURL = '';
+		let maxName = '';
+		let maxCode = '';
+		hxlBites._mapValues.forEach(function(geomMeta){
+			geomMeta.codes.forEach(function(code){
+				let match = 0;
+				values.forEach(function(value,i){
+					if(code.values.indexOf(value)>-1){
+						match++;
+					}
+				});
+				if(match>maxMatch){
+					maxMatch=match;
+					maxURL = geomMeta.url;
+					maxName = geomMeta.name;
+					maxCode = code.name;
 				}
 			});
-			if(match>maxMatch){
-				maxMatch=match;
-				maxCode = code.name;
-			}
 		});
 		let matchPercent = maxMatch/values.length;
 		let unmatched = values.length - maxMatch;
-		let url = this._getGeomURL(name);
-		return {'unmatched':unmatched,'percent':matchPercent,'code':maxCode,'url':url};
-	},
-
-	_getGeomURL(name){
-		url = {};
-		url['world_0'] = 'world.json';
-		return url[name];
+		return {'unmatched':unmatched,'percent':matchPercent,'code':maxCode,'name':maxName,'url':maxURL};
 	},
 
 	//change later to form every iteration

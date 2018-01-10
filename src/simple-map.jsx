@@ -32,6 +32,7 @@ class SimpleMap extends Component {
 
       var path = geoPath().projection(projection);    
 
+      console.log(self.props);
       svg.selectAll("path")
          .data(self.props.geom.features)
          .enter().append("path")
