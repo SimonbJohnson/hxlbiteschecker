@@ -89,8 +89,9 @@ class MapBites extends Component {
 
       this.props.bites.forEach(function(map,i){
         let key = 'map'+i
-        let codes = map.bite.map(function(d,i){
-          return d[0];
+        let codes = {};
+        map.bite.forEach(function(d,i){
+          codes[d[0]] = d[1];
         });
         bites.push(<MapBite key={key} url={map.geom_url} codes={codes} attribute={map.geom_attribute} />);
       });
@@ -131,10 +132,11 @@ class MapBite extends Component {
   render(){
 
     let comp = null;
+    let colors = ["#CCCCCC","#FFCDD2","#E57373","#F44336","#D32F2F","#B71C1C"];
     if(this.state.loading){
       comp = <h1>Loading Map</h1>;
     } else {
-      comp = <SimpleMap width="350" height="400" geom={this.state.geom} color="#ff0000" codes={this.props.codes} attribute={this.props.attribute} />;
+      comp = <SimpleMap width="350" height="400" geom={this.state.geom} colors={colors} codes={this.props.codes} attribute={this.props.attribute} />;
     }
     return (
       <div className="mapbite">{comp}</div>

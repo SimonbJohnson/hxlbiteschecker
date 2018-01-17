@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.16.2",
+    "d3-array": "^1.2.1",
     "d3-geo": "^1.7.1",
     "d3-selection": "^1.1.0",
     "react": "^15.6.1",
@@ -15,7 +16,7 @@
   },
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",    
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",

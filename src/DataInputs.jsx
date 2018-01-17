@@ -8,14 +8,26 @@ class DataInputs extends Component {
     super(props)
     this.state = { hxlURL: null};
     this.setURL = this.setURL.bind(this);
-    this.loadData = this.loadData.bind(this);
+    this.loadData = this.loadData.bind(this);    
+  }
+
+  componentDidMount(){
+    this.urlParams = new URLSearchParams(window.location.search);
+    let hxlURL = null;
+    let paramsURL = this.urlParams.getAll('url');
+    console.log(paramsURL);
+    if(paramsURL.length>0){
+      hxlURL = paramsURL[0];
+      this.setState({ hxlURL: hxlURL},this.loadData);
+    }  
   }
 
   loadData(){
     let self = this;
-    let url = 'https://proxy.hxlstandard.org/data.json?force=on&url=' + encodeURIComponent(this.state.hxlURL);
+    window.history.pushState('', 'HXL Bites Checker', '?url='+this.state.hxlURL);
+    let hxlProxyURL = 'https://proxy.hxlstandard.org/data.json?force=on&url=' + encodeURIComponent(this.state.hxlURL);
     axios
-      .get(url)
+      .get(hxlProxyURL)
       .then(function(result) {
         self.props.onLoad(result.data);
       });   
@@ -28,7 +40,7 @@ class DataInputs extends Component {
   render() {
     return (
       <div>
-        <Input id="urlinput" placeholder='url of data set' onChange={this.setURL} /><Button onClick={this.loadData} >Load</Button>
+        <Input id="urlinput" placeholder='url of data set' value={this.state.hxlURL} onChange={this.setURL} /><Button onClick={this.loadData} >Load</Button>
       </div>
     );
   }

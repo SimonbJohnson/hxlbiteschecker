@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { geoMercator, geoPath } from 'd3-geo'
 import { select } from 'd3-selection'
+import { max } from 'd3-array'
 
 
 class SimpleMap extends Component {
@@ -17,9 +18,17 @@ class SimpleMap extends Component {
       this.createMap()
    }
    createMap() {
+
       let self = this;
       const node = this.node
-
+      let maxValue = 0;
+      let key = '';
+      for (key in self.props.codes){
+         if(self.props.codes[key]>maxValue){
+            maxValue = self.props.codes[key];
+         }
+      }
+      let colorLength = self.props.colors.length;
       select(node).selectAll("*").remove();
 
       var svg = select(node)
@@ -32,16 +41,18 @@ class SimpleMap extends Component {
 
       var path = geoPath().projection(projection);    
 
-      console.log(self.props);
       svg.selectAll("path")
          .data(self.props.geom.features)
          .enter().append("path")
          .attr("d", path)
          .attr("fill",function(d){
-            if(self.props.codes.indexOf(d.properties[self.props.attribute])>-1){
-               return self.props.color;
+            let featureCode = d.properties[self.props.attribute];            
+            if(isNaN(self.props.codes[featureCode])){
+               return '#cccccc'
             } else {
-               return "#cccccc";
+               let value = self.props.codes[featureCode];
+               let index = Math.ceil(value/maxValue*(colorLength-1));
+               return self.props.colors[index];
             }           
          })
          .attr("stroke","#ffffff")
@@ -51,8 +62,8 @@ class SimpleMap extends Component {
          });
          let bound = [];
          let set = false;
-         this.props.codes.forEach(function(d,i){
-            let geom = select('#country'+d)
+         for (key in this.props.codes){
+            let geom = select('#country'+key)
             if(!geom.empty()){
                let bounds = geom.node().getBBox();
                if(!set){
@@ -73,7 +84,7 @@ class SimpleMap extends Component {
                   }                  
                }
             }
-         });
+         };
       
          let dx = (bound[2]-bound[0]);
          let dy = (bound[3]-bound[1]);
