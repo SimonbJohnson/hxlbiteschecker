@@ -73,7 +73,7 @@ hxlBites._tableBites = [
 'criteria':['who > 10'],
 'variables': ['who', 'sum(value)'],
 'table':'',
-'title':'{value} by {who}',
+'title':'{2} by {1}',
 'priority': 8,
 },
 {
