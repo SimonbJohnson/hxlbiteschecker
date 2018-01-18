@@ -61,7 +61,7 @@ let hxlBites = {
 			if(matchingValues !== false){
 				let variables = self._getVariables(bite,matchingValues);
 				let newBites = self._generateTextBite(bite.phrase,variables);
-				newBites.forEach(function(newBite){
+				newBites.forEach(function(newBite,i){
 					bites.push({'type':'text','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id});
 				});
 				
@@ -81,12 +81,15 @@ let hxlBites = {
 			});
 			let matchingValues = self._checkCriteria(bite.criteria,distinctOptions);
 			if(matchingValues !== false){
+				console.log(bite);
+				console.log(matchingValues);
 				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
-				let title = self._generateTextBite(bite.title,titleVariables);
+				let titles = self._generateTextBite(bite.title,titleVariables);
 				let variables = self._getTableVariables(self._data,bite,matchingValues);
+				console.log(variables);
 				let newBites = self._generateTableBite(bite.table,variables);
-				newBites.forEach(function(newBite){
-					bites.push({'type':'table','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':title});
+				newBites.forEach(function(newBite,i){
+					bites.push({'type':'table','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':titles[i]});
 				});				
 			}			
 		});
@@ -105,12 +108,10 @@ let hxlBites = {
 			let matchingValues = self._checkCriteria(bite.criteria,distinctOptions);
 			if(matchingValues !== false){
 				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
-				let title = self._generateTextBite(bite.title,titleVariables);
+				let titles = self._generateTextBite(bite.title,titleVariables);
 				let variables = self._getCrossTableVariables(self._data,bite,matchingValues);
-				console.log('crosstables');
-				console.log(variables);
 				let newBite = self._generateCrossTableBite(bite.table,variables);
-				bites.push({'type':'crosstable','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':title});
+				bites.push({'type':'crosstable','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':titles[0]});
 			}			
 		});
 		return bites;
@@ -128,10 +129,10 @@ let hxlBites = {
 			let matchingValues = self._checkCriteria(bite.criteria,distinctOptions);
 			if(matchingValues !== false){
 				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
-				let title = self._generateTextBite(bite.title,titleVariables);
+				let titles = self._generateTextBite(bite.title,titleVariables);
 				let variables = self._getTableVariables(self._data,bite,matchingValues)[0];
 				let newBite = self._generateChartBite(bite.chart,variables);
-				bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':title});
+				bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':titles[0]});
 			}			
 		});
 		return bites;
@@ -173,15 +174,28 @@ let hxlBites = {
 	},
 
 	_getTitleVariables: function(variables,matchingValues){
+		console.log('titlevariables');
+		console.log(variables);
 		let titleVariables = [];
-		variables.forEach(function(v){
-					if(v.indexOf('(')==-1){
-						let header = matchingValues[v][0].header;
-						titleVariables.push([header]);
+		let length = matchingValues[variables[0]].length;
+		for(var pos = 0;pos<length;pos++){
+			variables.forEach(function(v,i){
+				if(pos==0){
+					titleVariables.push([]);
+				}
+				if(v.indexOf('(')==-1){
+					let header = '';
+					if(i==0){
+						header = matchingValues[v][pos].header;
 					} else {
-						titleVariables.push('');
+						header = matchingValues[v][0].header;
 					}
-				});
+					titleVariables[i].push(header);
+				} else {
+					titleVariables[i].push('');
+				}
+			});
+		}	
 		return titleVariables;
 	},		
 
@@ -267,10 +281,9 @@ let hxlBites = {
 	_getTableVariables: function(data,bite,matchingValues){
 
 		//needs large efficieny improvements
+		//doesn't iterate through all variables, just the first column.  Is that a bad thing?
 		let self = this;
 		let tables = [];
-		console.log(bite);
-		console.log(matchingValues[bite.variables[0]]);
 		let keyMatches = matchingValues[bite.variables[0]];
 		keyMatches.forEach(function(keyMatch){
 			let table = [];
@@ -472,6 +485,8 @@ let hxlBites = {
 
 	//change later to form every iteration
 	_generateTextBite: function(phrase,variables){
+		console.log('gentextbite');
+		console.log(variables);
 		let length = variables[0].length;
 		let bites = [];
 		for(var pos = 0;pos<length;pos++){

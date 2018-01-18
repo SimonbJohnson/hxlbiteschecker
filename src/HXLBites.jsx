@@ -13,7 +13,7 @@ class TextBites extends Component {
 
     this.props.bites.forEach(function(bite,i){
       let key = 'text'+i;
-      bites.push(<li key={key} dangerouslySetInnerHTML={{__html: bite.bite}}></li>)
+      bites.push(<li key={key} dangerouslySetInnerHTML={{__html: bite.id + " - " + bite.bite}}></li>)
     });
 
     return (
