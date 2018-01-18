@@ -254,10 +254,10 @@ class HXLBites extends Component {
         <ChartBites bites={chartBites} />
         <h1>Maps</h1>
         <MapBites bites={mapBites} />
+        <h1>Cross Tables</h1>
+        <CrossTableBites bites={crossTableBites} />        
         <h1>Tables</h1>
         <TableBites bites={tableBites} />
-        <h1>Cross Tables</h1>
-        <CrossTableBites bites={crossTableBites} />
       </div>
     );
   }
