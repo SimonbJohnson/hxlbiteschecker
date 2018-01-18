@@ -130,9 +130,11 @@ let hxlBites = {
 			if(matchingValues !== false){
 				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
 				let titles = self._generateTextBite(bite.title,titleVariables);
-				let variables = self._getTableVariables(self._data,bite,matchingValues)[0];
-				let newBite = self._generateChartBite(bite.chart,variables);
-				bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':titles[0]});
+				let variables = self._getTableVariables(self._data,bite,matchingValues);
+				let newBites = self._generateChartBite(bite.chart,variables);
+				newBites.forEach(function(newBite,i){
+					bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':titles[i]});
+				})		
 			}			
 		});
 		return bites;
@@ -552,23 +554,28 @@ let hxlBites = {
 		return bite;
 	},	
 
-	_generateChartBite: function(chart,variables){
-		let chartData = this._transposeTable(variables);
-		if(chart.length>0){
-			let func=chart.split('(')[0];
-			if(func=='rows'){
-				let value = parseInt(chart.split('(')[1].split(')')[0]);
-				chartData = chartData.filter(function(row,i){
-					if(i<value+1){
-						return true;
-					} else {
-						return false;
-					}
-				}) ;
+	_generateChartBite: function(chart,variablesList){
+		let self = this;
+		let bites = [];
+		variablesList.forEach(function(variables){
+			let chartData = self._transposeTable(variables);
+			if(chart.length>0){
+				let func=chart.split('(')[0];
+				if(func=='rows'){
+					let value = parseInt(chart.split('(')[1].split(')')[0]);
+					chartData = chartData.filter(function(row,i){
+						if(i<value+1){
+							return true;
+						} else {
+							return false;
+						}
+					}) ;
+				}
 			}
-		}
-		let bite = chartData;
-		return bite;
+			let bite = chartData;
+			bites.push(bite);
+		});
+		return bites
 	},
 
 
