@@ -81,12 +81,9 @@ let hxlBites = {
 			});
 			let matchingValues = self._checkCriteria(bite.criteria,distinctOptions);
 			if(matchingValues !== false){
-				console.log(bite);
-				console.log(matchingValues);
 				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
 				let titles = self._generateTextBite(bite.title,titleVariables);
 				let variables = self._getTableVariables(self._data,bite,matchingValues);
-				console.log(variables);
 				let newBites = self._generateTableBite(bite.table,variables);
 				newBites.forEach(function(newBite,i){
 					bites.push({'type':'table','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':titles[i]});
@@ -176,8 +173,6 @@ let hxlBites = {
 	},
 
 	_getTitleVariables: function(variables,matchingValues){
-		console.log('titlevariables');
-		console.log(variables);
 		let titleVariables = [];
 		let length = matchingValues[variables[0]].length;
 		for(var pos = 0;pos<length;pos++){
@@ -487,8 +482,6 @@ let hxlBites = {
 
 	//change later to form every iteration
 	_generateTextBite: function(phrase,variables){
-		console.log('gentextbite');
-		console.log(variables);
 		let length = variables[0].length;
 		let bites = [];
 		for(var pos = 0;pos<length;pos++){
@@ -581,7 +574,7 @@ let hxlBites = {
 
 	//use better way to get tags that does not grab first tag.
 	_generateMapBite: function(map,variables,location,level){
-		let mapData = this._transposeTable(variables);
+		let mapData = this._transposeTable(variables[0]);
 		let bite = mapData;
 		return bite;
 	},

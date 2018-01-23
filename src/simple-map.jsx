@@ -63,6 +63,7 @@ class SimpleMap extends Component {
          let bound = [];
          let set = false;
          for (key in this.props.codes){
+            console.log(key);
             let geom = select('#country'+key)
             if(!geom.empty()){
                let bounds = geom.node().getBBox();
