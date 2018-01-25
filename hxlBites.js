@@ -130,10 +130,11 @@ let hxlBites = {
 				let variables = self._getTableVariables(self._data,bite,matchingValues);
 				let newBites = self._generateChartBite(bite.chart,variables);
 				newBites.forEach(function(newBite,i){
-					bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':titles[i]});
-				})		
+					bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite.bite, 'id':bite.id, 'uniqueid':newBite.uniqueid, 'title':titles[i]});
+				});		
 			}			
 		});
+		console.log(bites);
 		return bites;
 	},
 
@@ -279,6 +280,7 @@ let hxlBites = {
 
 		//needs large efficieny improvements
 		//doesn't iterate through all variables, just the first column.  Is that a bad thing?
+		//tomrrow - pass on matching values with table
 		let self = this;
 		let tables = [];
 		let keyMatches = matchingValues[bite.variables[0]];
@@ -551,6 +553,7 @@ let hxlBites = {
 		let self = this;
 		let bites = [];
 		variablesList.forEach(function(variables){
+			console.log(variables);
 			let chartData = self._transposeTable(variables);
 			if(chart.length>0){
 				let func=chart.split('(')[0];
@@ -565,7 +568,7 @@ let hxlBites = {
 					}) ;
 				}
 			}
-			let bite = chartData;
+			let bite = {'bite':chartData,'uniqueID':''};
 			bites.push(bite);
 		});
 		return bites
