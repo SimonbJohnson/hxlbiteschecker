@@ -45,7 +45,6 @@ class TableBites extends Component {
 class CrossTableBites extends Component {
 
   render(){
-
     let bites = [];
     this.props.bites.forEach(function(bite,i){
       let key = 'crosstable'+i;
@@ -121,10 +120,7 @@ class MapBite extends Component {
     axios
       .get(url)
       .then(function(result) {
-        console.log(result);
         let geom = topojson.feature(result.data,result.data.objects.geom);
-
-        console.log(geom);
         self.setState({geom: geom, loading: false});
       });
   }
@@ -213,7 +209,6 @@ class HXLBites extends Component {
   render() {
 
     let self = this;
-
     let textBites = [];
     let chartBites = [];
     let mapBites = [];
@@ -234,7 +229,6 @@ class HXLBites extends Component {
         bite.bite = self.getNamedArray(bite.bite)
       });
       mapBites = hxlBites.getMapBites();
-      console.log(mapBites);
       tableBites = hxlBites.getTableBites();
       tableBites.forEach(function(bite){
         bite.html = hxlBites.render(null,bite);
