@@ -12,20 +12,28 @@ class DataInputs extends Component {
   }
 
   componentDidMount(){
-    this.urlParams = new URLSearchParams(window.location.search);
     let hxlURL = null;
-    let paramsURL = this.urlParams.getAll('url');
-    console.log(paramsURL);
-    if(paramsURL.length>0){
-      hxlURL = paramsURL[0];
+    var paramURL = decodeURIComponent(getUrlVars()["url"]);
+    if(paramURL.length>0){
+      hxlURL = paramURL;
       this.setState({ hxlURL: hxlURL},this.loadData);
-    }  
+    }
+
+    function getUrlVars() {
+      var vars = {};
+      var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
+      function(m,key,value) {
+        vars[key] = value;
+      });
+    return vars;
+  }  
   }
 
   loadData(){
     let self = this;
-    window.history.pushState('', 'HXL Bites Checker', '?url='+this.state.hxlURL);
-    let hxlProxyURL = 'https://proxy.hxlstandard.org/data.json?force=on&url=' + encodeURIComponent(this.state.hxlURL);
+    let param = encodeURIComponent(this.state.hxlURL);
+    window.history.pushState('', 'HXL Bites Checker', '?url='+param);
+    let hxlProxyURL = 'https://proxy.hxlstandard.org/data.json?force=on&url=' +param;
     axios
       .get(hxlProxyURL)
       .then(function(result) {
