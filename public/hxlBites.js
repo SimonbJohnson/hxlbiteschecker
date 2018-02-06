@@ -83,10 +83,10 @@ let hxlBites = {
 			if(matchingValues !== false){
 				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
 				let titles = self._generateTextBite(bite.title,titleVariables);
-				let variables = self._getTableVariables(self._data,bite,matchingValues);
+				let variables = self._getTableVariablesWithMatching(self._data,bite,matchingValues);
 				let newBites = self._generateTableBite(bite.table,variables);
 				newBites.forEach(function(newBite,i){
-					bites.push({'type':'table','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':titles[i]});
+					bites.push({'type':'table','subtype':bite.subType,'priority':bite.priority,'bite':newBite.bite, 'uniqueID':newBite.uniqueID, 'id':bite.id, 'title':titles[i]});
 				});				
 			}			
 		});
@@ -108,9 +108,10 @@ let hxlBites = {
 				let titles = self._generateTextBite(bite.title,titleVariables);
 				let variables = self._getCrossTableVariables(self._data,bite,matchingValues);
 				let newBite = self._generateCrossTableBite(bite.table,variables);
-				bites.push({'type':'crosstable','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'title':titles[0]});
+				bites.push({'type':'crosstable','subtype':bite.subType,'priority':bite.priority,'bite':newBite.bite, 'uniqueID':newBite.uniqueID, 'id':bite.id, 'title':titles[0]});
 			}			
 		});
+		console.log(bites);
 		return bites;
 	},	
 
@@ -127,14 +128,13 @@ let hxlBites = {
 			if(matchingValues !== false){
 				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
 				let titles = self._generateTextBite(bite.title,titleVariables);
-				let variables = self._getTableVariables(self._data,bite,matchingValues);
+				let variables = self._getTableVariablesWithMatching(self._data,bite,matchingValues);
 				let newBites = self._generateChartBite(bite.chart,variables);
 				newBites.forEach(function(newBite,i){
-					bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite.bite, 'id':bite.id, 'uniqueid':newBite.uniqueid, 'title':titles[i]});
+					bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite.bite, 'id':bite.id, 'uniqueID':newBite.uniqueID, 'title':titles[i]});
 				});		
 			}			
 		});
-		console.log(bites);
 		return bites;
 	},
 
@@ -163,9 +163,9 @@ let hxlBites = {
 					let values = matchingValues[keyVariable][0].values;
 					let mapCheck = self._checkMapCodes(level,values);
 					if(mapCheck.percent>0.5){
-						let variables = self._getTableVariables(self._data,bite,matchingValues);
+						let variables = self._getTableVariablesWithMatching(self._data,bite,matchingValues);
 						let newBite = self._generateMapBite(bite.map,variables,location,level);
-						bites.push({'type':'map','subtype':bite.subType,'priority':bite.priority,'bite':newBite, 'id':bite.id, 'geom_url':mapCheck.url,'geom_attribute':mapCheck.code});
+						bites.push({'type':'map','subtype':bite.subType,'priority':bite.priority,'bite':newBite.bite, 'uniqueID':newBite.uniqueID, 'id':bite.id, 'geom_url':mapCheck.url,'geom_attribute':mapCheck.code});
 					}
 				}
 			}		
@@ -276,7 +276,7 @@ let hxlBites = {
 		return ingredientValues;
 	},
 
-	_getTableVariables: function(data,bite,matchingValues){
+	_getTableVariablesWithMatching: function(data,bite,matchingValues){
 
 		//needs large efficieny improvements
 		//doesn't iterate through all variables, just the first column.  Is that a bad thing?
@@ -284,6 +284,7 @@ let hxlBites = {
 		let self = this;
 		let tables = [];
 		let keyMatches = matchingValues[bite.variables[0]];
+
 		keyMatches.forEach(function(keyMatch){
 			let table = [];
 			let keyValues = self._varFuncKeyValue(keyMatch);
@@ -291,6 +292,7 @@ let hxlBites = {
 			keyValues.forEach(function(keyValue){
 				firstCol.push(keyValue.key); 
 			});
+
 			table.push(firstCol);
 			bite.variables.forEach(function(variable,index){
 				if(index>0){
@@ -342,7 +344,7 @@ let hxlBites = {
 					table.push(col);
 				}
 			});
-			tables.push(table);
+			tables.push({'table':table,'uniqueID':bite.id+'/'+keyMatch.tag+'/'+keyMatch.col});
 		});
 		return tables;
 	},
@@ -396,7 +398,7 @@ let hxlBites = {
 			});					
 			table.push(col);
 		});
-		return table;
+		return {'table':table,'uniqueID':bite.id+'/'+keyMatch1.tag+'/'+keyMatch1.col+'/'+keyMatch2.tag+'/'+keyMatch2.col};
 	},
 
 	_filterData(data,col,value){
@@ -510,7 +512,7 @@ let hxlBites = {
 		let length = variables.length;
 		let bites = [];
 		for(var pos = 0;pos<length;pos++){
-			let tableData = this._transposeTable(variables[pos]);
+			let tableData = this._transposeTable(variables[pos].table);
 			if(table.length>0){
 				let func=table.split('(')[0];
 				if(func=='rows'){
@@ -524,14 +526,14 @@ let hxlBites = {
 					}) ;
 				}
 			}
-			let bite = tableData;
+			let bite = {'bite':tableData,'uniqueID':variables[pos].uniqueID};
 			bites.push(bite);
 		}
 		return bites;
 	},
 
 	_generateCrossTableBite: function(table,variables){
-		let tableData = this._transposeTable(variables);
+		let tableData = this._transposeTable(variables.table);
 		if(table.length>0){
 			let func=table.split('(')[0];
 			if(func=='rows'){
@@ -546,15 +548,14 @@ let hxlBites = {
 			}
 		}
 		let bite = tableData;
-		return bite;
+		return {'bite':bite,'uniqueID':variables.uniqueID};
 	},	
 
 	_generateChartBite: function(chart,variablesList){
 		let self = this;
 		let bites = [];
 		variablesList.forEach(function(variables){
-			console.log(variables);
-			let chartData = self._transposeTable(variables);
+			let chartData = self._transposeTable(variables.table);
 			if(chart.length>0){
 				let func=chart.split('(')[0];
 				if(func=='rows'){
@@ -568,7 +569,7 @@ let hxlBites = {
 					}) ;
 				}
 			}
-			let bite = {'bite':chartData,'uniqueID':''};
+			let bite = {'bite':chartData,'uniqueID':variables.uniqueID};
 			bites.push(bite);
 		});
 		return bites
@@ -577,8 +578,8 @@ let hxlBites = {
 
 	//use better way to get tags that does not grab first tag.
 	_generateMapBite: function(map,variables,location,level){
-		let mapData = this._transposeTable(variables[0]);
-		let bite = mapData;
+		let mapData = this._transposeTable(variables[0].table);
+		let bite = {'bite':mapData,'uniqueID':variables[0].uniqueID};
 		return bite;
 	},
 

@@ -6,15 +6,15 @@ class DataInputs extends Component {
 
   constructor(props){
     super(props)
-    this.state = { hxlURL: null};
+    this.state = { hxlURL: undefined};
     this.setURL = this.setURL.bind(this);
     this.loadData = this.loadData.bind(this);    
   }
 
   componentDidMount(){
-    let hxlURL = null;
+    let hxlURL = undefined;
     var paramURL = decodeURIComponent(getUrlVars()["url"]);
-    if(paramURL.length>0){
+    if(paramURL!=='undefined' && paramURL!==undefined){
       hxlURL = paramURL;
       this.setState({ hxlURL: hxlURL},this.loadData);
     }
@@ -25,8 +25,8 @@ class DataInputs extends Component {
       function(m,key,value) {
         vars[key] = value;
       });
-    return vars;
-  }  
+        return vars;
+      }  
   }
 
   loadData(){

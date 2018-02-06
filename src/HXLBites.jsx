@@ -30,8 +30,9 @@ class TableBites extends Component {
 
     let bites = [];
     this.props.bites.forEach(function(bite,i){
+      console.log(bite);
       let key = 'table'+i;
-      bites.push(<div  key={key}>{bite.id} - {bite.title}<div dangerouslySetInnerHTML={{__html: bite.html}}></div></div>)
+      bites.push(<div  key={key}>{bite.id} - {bite.uniqueID} - {bite.title}<div dangerouslySetInnerHTML={{__html: bite.html}}></div></div>)
     });
 
     return (
@@ -48,7 +49,7 @@ class CrossTableBites extends Component {
     let bites = [];
     this.props.bites.forEach(function(bite,i){
       let key = 'crosstable'+i;
-      bites.push(<div key={key}>{bite.id} - {bite.title}<div dangerouslySetInnerHTML={{__html: bite.html}}></div></div>)
+      bites.push(<div key={key}>{bite.id} - {bite.uniqueID} - {bite.title}<div dangerouslySetInnerHTML={{__html: bite.html}}></div></div>)
     });
 
     return (
@@ -65,11 +66,12 @@ class ChartBites extends Component {
 
     let bites = [];
     this.props.bites.forEach(function(chart,i){
+      console.log(chart);
       let key = 'chart'+i
       if(chart.subtype==='pie'){
-        bites.push(<Pie3WChart key={key} data={chart.bite} title={chart.title}/>);
+        bites.push(<Pie3WChart key={key} data={chart.bite} title={chart.title} id={chart.id} uniqueID={chart.uniqueID}/>);
       } else {
-        bites.push(<Row3WChart key={key} data={chart.bite} title={chart.title}/>);
+        bites.push(<Row3WChart key={key} data={chart.bite} title={chart.title} id={chart.id} uniqueID={chart.uniqueID}/>);
       }
     });
 
@@ -87,12 +89,13 @@ class MapBites extends Component {
       let bites = [];
 
       this.props.bites.forEach(function(map,i){
+        console.log(map);
         let key = 'map'+i
         let codes = {};
         map.bite.forEach(function(d,i){
           codes[d[0]] = d[1];
         });
-        bites.push(<MapBite key={key} url={map.geom_url} codes={codes} attribute={map.geom_attribute} />);
+        bites.push(<MapBite key={key} url={map.geom_url} codes={codes} attribute={map.geom_attribute} id={map.id} uniqueID={map.uniqueID} />);
       });
 
       return (
@@ -135,7 +138,7 @@ class MapBite extends Component {
       comp = <SimpleMap width="350" height="400" geom={this.state.geom} colors={colors} codes={this.props.codes} attribute={this.props.attribute} />;
     }
     return (
-      <div className="mapbite">{comp}</div>
+      <div className="mapbite">{this.props.id} - {this.props.uniqueID}<div>{comp}</div></div>
     )
   }
 }
@@ -148,7 +151,7 @@ class Pie3WChart extends Component {
 
     return (
       <div>
-        <p>{this.props.title}</p>
+        <p>{this.props.id} - {this.props.uniqueID} - {this.props.title}</p>
         <PieChart width={350} height={400} isAnimationActive={false}>
           <Pie data={this.props.data} cx="50%" cy="50%" outerRadius={60} label={({name, value})=>`${name}: ${value}`} dataKey="value" labelLine={false} isAnimationActive={false}>
             {
@@ -173,7 +176,7 @@ class Row3WChart extends Component {
 
     return (
       <div>
-        <p>{this.props.title}</p>
+        <p>{this.props.id} - {this.props.uniqueID} - {this.props.title}</p>
         <BarChart width={350} height={400} data={this.props.data}
               margin={{top: 5, right: 20, left: 50, bottom: 5}} layout='vertical'>
          <XAxis type="number" allowDecimals={false} />
