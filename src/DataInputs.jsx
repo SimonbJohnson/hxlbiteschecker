@@ -33,7 +33,7 @@ class DataInputs extends Component {
     let self = this;
     let param = encodeURIComponent(this.state.hxlURL);
     window.history.pushState('', 'HXL Bites Checker', '?url='+param);
-    let hxlProxyURL = 'https://proxy.hxlstandard.org/data.json?force=on&url=' +param;
+    let hxlProxyURL = 'https://proxy.hxlstandard.org/data.json?force=1&url=' +param;
     axios
       .get(hxlProxyURL)
       .then(function(result) {

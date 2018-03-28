@@ -95,7 +95,7 @@ class MapBites extends Component {
         map.bite.forEach(function(d,i){
           codes[d[0]] = d[1];
         });
-        bites.push(<MapBite key={key} url={map.geom_url} codes={codes} attribute={map.geom_attribute} id={map.id} uniqueID={map.uniqueID} />);
+        bites.push(<MapBite key={key} url={map.geom_url} title={map.title} codes={codes} attribute={map.geom_attribute} id={map.id} uniqueID={map.uniqueID} />);
       });
 
       return (
@@ -138,7 +138,7 @@ class MapBite extends Component {
       comp = <SimpleMap width="350" height="400" geom={this.state.geom} colors={colors} codes={this.props.codes} attribute={this.props.attribute} />;
     }
     return (
-      <div className="mapbite">{this.props.id} - {this.props.uniqueID}<div>{comp}</div></div>
+      <div className="mapbite">{this.props.title} - {this.props.id} - {this.props.uniqueID}<div>{comp}</div></div>
     )
   }
 }
@@ -232,6 +232,7 @@ class HXLBites extends Component {
         bite.bite = self.getNamedArray(bite.bite)
       });
       mapBites = hxlBites.getMapBites();
+      console.log(mapBites);
       tableBites = hxlBites.getTableBites();
       tableBites.forEach(function(bite){
         bite.html = hxlBites.render(null,bite);

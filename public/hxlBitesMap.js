@@ -2,10 +2,21 @@ hxlBites._mapBites = [{
 'id':'map0001',
 'type':'map',
 'subType':'choropleth',
-'ingredients':[{'name':'where','tags':['#country+code','#adm1+code']}],
-'criteria':['where > 0'],
+'ingredients':[{'name':'where','tags':['#country+code','#adm1+code']},{'name':'value','tags':['#value','#affected','#indicator']}],
+'criteria':['where > 0','value ! 0'],
 'variables': ['where', 'count()'],
+'map':'Count of reports',
+'priority': 10,
+},
+{
+'id':'map0002',
+'type':'map',
+'subType':'choropleth',
+'ingredients':[{'name':'where','tags':['#country+code','#adm1+code']},{'name':'value','tags':['#value','#affected','#indicator']}],
+'criteria':['where > 0'],
+'variables': ['where', 'sum(value)'],
 'map':'',
+'title':'Map of {2}',
 'priority': 10,
 }];
 
