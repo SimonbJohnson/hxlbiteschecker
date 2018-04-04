@@ -30,7 +30,6 @@ class TableBites extends Component {
 
     let bites = [];
     this.props.bites.forEach(function(bite,i){
-      console.log(bite);
       let key = 'table'+i;
       bites.push(<div  key={key}>{bite.id} - {bite.uniqueID} - {bite.title}<div dangerouslySetInnerHTML={{__html: bite.html}}></div></div>)
     });
@@ -66,7 +65,6 @@ class ChartBites extends Component {
 
     let bites = [];
     this.props.bites.forEach(function(chart,i){
-      console.log(chart);
       let key = 'chart'+i
       if(chart.subtype==='pie'){
         bites.push(<Pie3WChart key={key} data={chart.bite} title={chart.title} id={chart.id} uniqueID={chart.uniqueID}/>);
@@ -89,7 +87,6 @@ class MapBites extends Component {
       let bites = [];
 
       this.props.bites.forEach(function(map,i){
-        console.log(map);
         let key = 'map'+i
         let codes = {};
         map.bite.forEach(function(d,i){
@@ -151,7 +148,7 @@ class Pie3WChart extends Component {
 
     return (
       <div>
-        <p>{this.props.id} - {this.props.uniqueID} - {this.props.title}</p>
+        <p>{this.props.title} - {this.props.id} - {this.props.uniqueID}</p>
         <PieChart width={350} height={400} isAnimationActive={false}>
           <Pie data={this.props.data} cx="50%" cy="50%" outerRadius={60} label={({name, value})=>`${name}: ${value}`} dataKey="value" labelLine={false} isAnimationActive={false}>
             {
@@ -176,7 +173,7 @@ class Row3WChart extends Component {
 
     return (
       <div>
-        <p>{this.props.id} - {this.props.uniqueID} - {this.props.title}</p>
+        <p>{this.props.title} - {this.props.id} - {this.props.uniqueID}</p>
         <BarChart width={350} height={400} data={this.props.data}
               margin={{top: 5, right: 20, left: 50, bottom: 5}} layout='vertical'>
          <XAxis type="number" allowDecimals={false} />
@@ -231,8 +228,8 @@ class HXLBites extends Component {
       chartBites.forEach(function(bite){
         bite.bite = self.getNamedArray(bite.bite)
       });
+      console.log(chartBites);
       mapBites = hxlBites.getMapBites();
-      console.log(mapBites);
       tableBites = hxlBites.getTableBites();
       tableBites.forEach(function(bite){
         bite.html = hxlBites.render(null,bite);

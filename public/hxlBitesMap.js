@@ -5,7 +5,8 @@ hxlBites._mapBites = [{
 'ingredients':[{'name':'where','tags':['#country+code','#adm1+code']},{'name':'value','tags':['#value','#affected','#indicator']}],
 'criteria':['where > 0','value ! 0'],
 'variables': ['where', 'count()'],
-'map':'Count of reports',
+'map':'',
+'title':'Count of reports',
 'priority': 10,
 },
 {

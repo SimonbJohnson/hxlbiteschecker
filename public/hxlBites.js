@@ -125,12 +125,12 @@ let hxlBites = {
 			});
 			let matchingValues = self._checkCriteria(bite.criteria,distinctOptions);
 			if(matchingValues !== false){
-				let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
-				let titles = self._generateTextBite(bite.title,titleVariables);
+				//let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
+				//let titles = self._generateTextBite(bite.title,titleVariables);
 				let variables = self._getTableVariablesWithMatching(self._data,bite,matchingValues);
 				let newBites = self._generateChartBite(bite.chart,variables);
 				newBites.forEach(function(newBite,i){
-					bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite.bite, 'id':bite.id, 'uniqueID':newBite.uniqueID, 'title':titles[i]});
+					bites.push({'type':'chart','subtype':bite.subType,'priority':bite.priority,'bite':newBite.bite, 'id':bite.id, 'uniqueID':newBite.uniqueID, 'title':newBite.title});
 				});		
 			}			
 		});
@@ -158,19 +158,16 @@ let hxlBites = {
 					level = 1;
 				}
 				if(level>-1){
-					let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
-					let titles = self._generateTextBite(bite.title,titleVariables);
+					//let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
+					//let titles = self._generateTextBite(bite.title,titleVariables);
 					let keyVariable = bite.variables[0]
 					let values = matchingValues[keyVariable][0].values;
 					let mapCheck = self._checkMapCodes(level,values);
-					console.log(matchingValues);
 					if(mapCheck.percent>0.5){
 						let variables = self._getTableVariablesWithMatching(self._data,bite,matchingValues);
-						console.log('variables');
-						console.log(variables);
 						let newBites = self._generateMapBite(bite.map,variables,location,level);
 						newBites.forEach(function(newBite,i){
-							bites.push({'type':'map','subtype':bite.subType,'title': titles[0],'priority':bite.priority,'bite':newBite.bite, 'uniqueID':newBite.uniqueID, 'id':bite.id, 'geom_url':mapCheck.url,'geom_attribute':mapCheck.code});
+							bites.push({'type':'map','subtype':bite.subType,'title': newBite.title,'priority':bite.priority,'bite':newBite.bite, 'uniqueID':newBite.uniqueID, 'id':bite.id, 'geom_url':mapCheck.url,'geom_attribute':mapCheck.code});
 						});
 					}
 				}
@@ -298,9 +295,7 @@ let hxlBites = {
 		
 		let self = this;
 		let tables = [];
-		console.log(bite.variables[0]);
 		let keyMatches = matchingValues[bite.variables[0]];
-		console.log(keyMatches);
 		keyMatches.forEach(function(keyMatch){
 			let table = [];
 			let keyValues = self._varFuncKeyValue(keyMatch);
@@ -308,43 +303,75 @@ let hxlBites = {
 			keyValues.forEach(function(keyValue){
 				firstCol.push(keyValue.key); 
 			});
-
-			table.push(firstCol);
-			idMatch = [];
+			var workingTables = [[]];
+			workingTables[0].push(firstCol);
+			var idMatches = [[]];
+			var headerMatches = [[]];
 			bite.variables.forEach(function(variable,index){
 				if(index>0){
-					let col = new Array(firstCol.length).fill(0);
 					if(variable.indexOf('(')>-1){
+						let col = new Array(firstCol.length).fill(0);
 						let func = variable.split('(')[0];
 						if(func == 'count'){
 							col[0] = 'Count';
 							keyValues.forEach(function(keyValue,index){
 								col[index+1] = keyValue.value;
 							});
+							workingTables.forEach(function(table,i){
+								workingTables[i].push(col);
+							});
 						}
 						if(func == 'sum'){
 							let sumValue = variable.split('(')[1].split(')')[0];
-							let match = matchingValues[sumValue][0];
-							idMatch.push({'tag':match.tag,'col':match.col});
-							col[0] = 'Value';
-							firstCol.forEach(function(value,index){
-								if(index>0){
-									let filteredData = self._filterData(data,keyMatch.col,value);
-									let sum = 0;
-									filteredData.forEach(function(row,index){
-										let value = Number(row[match.col]);
-										if(value!=NaN){
-											sum += value;
-										}									
-									});
-									col[index] = sum;
-								}
-							});						
+							var newWorkingTables = [];
+							var newIDMatches = [];
+							var newHeaderMatches = [];
+							var length = matchingValues[sumValue].length;
+							for (i = 0; i < length; i++){
+								newWorkingTables = newWorkingTables.concat(JSON.parse(JSON.stringify(workingTables)));
+								newIDMatches = newIDMatches.concat(JSON.parse(JSON.stringify(idMatches)));
+								newHeaderMatches = newIDMatches.concat(JSON.parse(JSON.stringify(headerMatches)));
+							}
+							workingTables = JSON.parse(JSON.stringify(newWorkingTables));
+							idMatches = JSON.parse(JSON.stringify(newIDMatches));
+							headerMatches = JSON.parse(JSON.stringify(newHeaderMatches));
+							matchingValues[sumValue].forEach(function(match, ti){
+								let col = new Array(firstCol.length).fill(0);
+								idMatches.forEach(function(idMatch,i){
+									if(i % length==ti){
+										idMatches[i].push({'tag':match.tag,'col':match.col});
+										headerMatches[i].push(match.header);
+									}
+								});
+								col[0] = 'Value';
+								firstCol.forEach(function(value,index){
+									if(index>0){
+										let filteredData = self._filterData(data,keyMatch.col,value);
+										let sum = 0;
+										filteredData.forEach(function(row,index){
+											let value = Number(row[match.col]);
+											if(value!=NaN){
+												sum += value;
+											}									
+										});
+										col[index] = sum;
+									}
+								});
+								workingTables.forEach(function(table,i){
+									if(i % length==ti){
+										workingTables[i].push(col);
+									}
+								});								
+							});					
 						}					
 					} else {
 						// use this code for sums!
 						let match = matchingValues[variable][0];
-						idMatch.push({'tag':match.tag,'col':match.col});
+						let col = new Array(firstCol.length).fill(0);
+						idMatches.forEach(function(idMatch,i){						
+							idMatches[i].push({'tag':match.tag,'col':match.col});
+							headerMatches[i].push(match.header);
+						})
 						col[0] = match.header;
 						firstCol.forEach(function(value,index){
 							if(index>0){
@@ -359,17 +386,26 @@ let hxlBites = {
 								col[index] = uniques.length;
 							}
 						});
-					}
-					table.push(col);
+						workingTables.forEach(function(table,i){
+							workingTables[i].push(col);
+						});
+					}					
 				}
 			});
-			var uniqueID = bite.id+'/'+keyMatch.tag+'/'+keyMatch.col
-			idMatch.forEach(function(d){
-				uniqueID = uniqueID + '/'+d.tag+'/'+d.col;
-			})
-			tables.push({'table':table,'uniqueID':uniqueID});
+			workingTables.forEach(function(table,i){
+				var uniqueID = bite.id+'/'+keyMatch.tag+'/'+keyMatch.col;
+				var titleVars = [[keyMatch.header]];
+				idMatches[i].forEach(function(d){
+					uniqueID = uniqueID + '/'+d.tag+'/'+d.col;
+				})
+				headerMatches[i].forEach(function(header){
+					titleVars.push([header]);
+				});
+
+				var titles = self._generateTextBite(bite.title,titleVars);
+				tables.push({'table':table,'uniqueID':uniqueID,'title':titles[0]});
+			});
 		});
-		console.log(tables);
 		return tables;
 	},
 
@@ -593,7 +629,7 @@ let hxlBites = {
 					}) ;
 				}
 			}
-			let bite = {'bite':chartData,'uniqueID':variables.uniqueID};
+			let bite = {'bite':chartData,'uniqueID':variables.uniqueID,'title':variables.title};
 			bites.push(bite);
 		});
 		return bites
@@ -606,7 +642,7 @@ let hxlBites = {
 		let bites = [];
 		variables.forEach(function(v){
 			let mapData = self._transposeTable(v.table);
-			let bite = {'bite':mapData,'uniqueID':v.uniqueID};
+			let bite = {'bite':mapData,'uniqueID':v.uniqueID,'title':v.title};
 			bites.push(bite);
 		});
 		return bites;
@@ -693,5 +729,9 @@ let hxlBites = {
 		} else {
 			return this._varFuncList(match);
 		}
+	}
+
+	reverse: function(id){
+		console.log(id);
 	}
 }
