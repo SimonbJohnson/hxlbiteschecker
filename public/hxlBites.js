@@ -729,7 +729,7 @@ let hxlBites = {
 		} else {
 			return this._varFuncList(match);
 		}
-	}
+	},
 
 	reverse: function(id){
 		console.log(id);
