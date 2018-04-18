@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#000000">
+    <link rel="shortcut icon" href="favicon.ico">
+    <title>HXL Bites Checker</title>
+    <script src="hxl.js"></script>
+    <script src="hxlBites.js"></script>
+    <script src="hxlBitesRender.js"></script>
+    <script src="hxlBitesText.js"></script>
+    <script src="hxlBitesTable.js"></script>
+    <script src="hxlBitesChart.js"></script>
+    <script src="hxlBitesMap.js"></script>
+    <script src="hxlBitesCrossTables.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous"></script>       
+  </head>
+  <body>
+    <script>
+      $.ajax({
+        url: "https://proxy.hxlstandard.org/data.json?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1lH4KPEGMpEAaYtEAMU-UddBXcqX5usMQzT8u-BMJ2PY%2Fedit%23gid%3D0",
+        success: function(result){
+          test(result,'cross0001/#loc/0/#status/7');
+        }
+      });
+      $.ajax({
+        url: "https://proxy.hxlstandard.org/data.json?force=1&url=https://docs.google.com/spreadsheets/d/1glxR_Cm8PH3532pPEdsoR47TBVWHIPMwQ_VKi6ukwRU/edit#gid=0",
+        success: function(result){
+          //test(result,'chart0010/#sector/2');
+          //test(result,'chart0012/#org/1');
+          //test(result,'map0001/#country+code/3');
+          //test(result,'table0001/#sector/2/#org/1/#country+name/0');
+          //test(result,'table0008/#sector/2');
+        }
+      });      
+      function test(data,id){
+        var bite = hxlBites.data(data).reverse(id);
+        console.log(bite);
+      }
+    </script>
+    <div id="root"></div>
+  </body>
+</html>
