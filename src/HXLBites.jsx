@@ -216,6 +216,7 @@ class HXLBites extends Component {
     let crossTableBites = [];
 
     if(this.props.data!=null){
+      console.log(this.props.data);
       textBites = hxlBites.data(this.props.data).getTextBites();
       textBites.sort(function(a,b){
         return b.priority > a.priority;

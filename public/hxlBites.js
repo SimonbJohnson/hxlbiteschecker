@@ -148,7 +148,7 @@ let hxlBites = {
 			});
 			let matchingValues = self._checkCriteria(bite.criteria,distinctOptions);
 			if(matchingValues !== false){
-				let tag = bite.ingredients[0].tags[0];
+				let tag = matchingValues.where[0].tag;
 				let location = null;
 				let level = -1;
 				if(tag=='#country+code'){
@@ -157,12 +157,19 @@ let hxlBites = {
 				if(tag=='#adm1+code'){
 					level = 1;
 				}
+				if(tag=='#adm2+code'){
+					level = 2;
+				}
+				if(tag=='#adm3+code'){
+					level = 3;
+				}							
 				if(level>-1){
 					//let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
 					//let titles = self._generateTextBite(bite.title,titleVariables);
 					let keyVariable = bite.variables[0]
 					let values = matchingValues[keyVariable][0].values;
 					let mapCheck = self._checkMapCodes(level,values);
+					console.log(mapCheck);
 					if(mapCheck.percent>0.5){
 						let variables = self._getTableVariablesWithMatching(self._data,bite,matchingValues);
 						let newBites = self._generateMapBite(bite.map,variables,location,level);
@@ -291,7 +298,6 @@ let hxlBites = {
 	_getTableVariablesWithMatching: function(data,bite,matchingValues){
 
 		//needs large efficieny improvements
-		//doesn't iterate through all variables, just the first column.  Is that a bad thing? (yes)
 		
 		let self = this;
 		let tables = [];
@@ -620,13 +626,18 @@ let hxlBites = {
 				let func=chart.split('(')[0];
 				if(func=='rows'){
 					let value = parseInt(chart.split('(')[1].split(')')[0]);
+					var topRow = chartData.shift();
+					chartData.sort(function(a,b){
+						return b[1] - a[1];
+					});
+					chartData.unshift(topRow);					
 					chartData = chartData.filter(function(row,i){
 						if(i<value+1){
 							return true;
 						} else {
 							return false;
 						}
-					}) ;
+					});
 				}
 			}
 			let bite = {'bite':chartData,'uniqueID':variables.uniqueID,'title':variables.title};
@@ -732,6 +743,150 @@ let hxlBites = {
 	},
 
 	reverse: function(id){
-		console.log(id);
-	}
+
+		var self = this;
+
+		var parts = id.split('/');
+		var biteID = parts[0]
+		var columns = [];
+		var length = (parts.length-1)/2
+		for(i=0;i<length;i++){
+			columns.push({'tag':parts[i*2+1],'number':+parts[i*2+2]})
+		}	
+		columns.forEach(function(col,i){
+			columns[i]=self.confirmCols(col);
+			columns[i].values = self.getValues(self._data,col);
+			columns[i].uniqueValues = self.getDistinct(columns[i].values);
+		});
+		var bite = this.getBite(biteID)
+		var matchingValues = this.createMatchingValues(bite,columns);
+		var bites = [];
+		newBites = [];
+		let variables = self._getTableVariablesWithMatching(self._data,bite,matchingValues);
+		if(bite.type=='chart'){
+			newBites = self._generateChartBite(bite.chart,variables);
+		}
+		if(bite.type=='table'){
+			newBites = self._generateTableBite(bite.table,variables);
+		}
+		if(bite.type=='cross table'){
+			let variables = self._getCrossTableVariables(self._data,bite,matchingValues);
+			newBites = [self._generateCrossTableBite(bite.table,variables)];
+			newBites[0].title = 'Crosstable';
+		}
+		var mapCheck;						
+		if(bite.type=='map'){
+			let tag = bite.ingredients[0].tags[0];
+			let location = null;
+			let level = -1;
+			if(tag=='#country+code'){
+				level = 0;
+			}
+			if(tag=='#adm1+code'){
+				level = 1;
+			}
+			if(level>-1){
+				//let titleVariables = self._getTitleVariables(bite.variables,matchingValues);				
+				//let titles = self._generateTextBite(bite.title,titleVariables);
+				let keyVariable = bite.variables[0]
+				let values = matchingValues[keyVariable][0].values;
+				mapCheck = self._checkMapCodes(level,values);
+				if(mapCheck.percent>0.5){			
+					newBites = self._generateMapBite(bite.chart,variables);
+				}
+			}
+		}		
+		newBites.forEach(function(newBite,i){
+			bites.push({'type':bite.type,'subtype':bite.subType,'priority':bite.priority,'bite':newBite.bite, 'id':bite.id, 'uniqueID':newBite.uniqueID, 'title':newBite.title});
+			if(bite.type=='map'){
+				bites[i].geom_url=mapCheck.url;
+				bites[i].geom_attribute=mapCheck.code;
+			}
+		});
+		return bites[0];
+
+	},
+
+	getBite: function(id){
+		var bite = {};
+		hxlBites._chartBites.forEach(function(b){
+			if(b.id==id){
+				bite = b;
+			}
+		});
+		hxlBites._mapBites.forEach(function(b){
+			if(b.id==id){
+				bite = b;
+			}
+		});
+		hxlBites._tableBites.forEach(function(b){
+			if(b.id==id){
+				bite = b;
+			}
+		});
+		hxlBites._crossTableBites.forEach(function(b){
+			if(b.id==id){
+				bite = b;
+			}
+		});								
+		return bite;
+	},
+
+	confirmCols: function(col){
+		var found = false;
+		var tag = this._data[1][col.number].split('+')[0];
+		var colTag = col.tag.split('+')[0];
+		if(tag == colTag){
+			col.header = this._data[0][col.number];
+			return col;
+		} else {
+			return {}
+		}
+	},
+
+	createMatchingValues: function(bite,cols){
+		var matchingValues = {}
+		bite.ingredients.forEach(function(ingredient){
+			matchingValues[ingredient.name] = [];
+		});
+		cols.forEach(function(col){
+			//only match tags not attributes - improve in future - probably works 99% of the time
+			bite.ingredients.forEach(function(ingredient){
+				ingredient.tags.forEach(function(tag){
+					var formatTag = tag.replace('-','+').split('+')[0];
+					var colTag = col.tag.split('+')[0];
+					if(formatTag==colTag){
+						var matchingValue = {};
+						matchingValue['tag'] = col.tag;
+						matchingValue['header'] = col.header;
+						matchingValue['col'] = col.number;
+						matchingValue['values'] = col.values;
+						matchingValue['uniqueValues'] = col.uniqueValues;
+						matchingValues[ingredient.name].push(matchingValue);
+					}
+				});
+			});
+		});
+		return matchingValues;
+	},
+
+	getValues: function(data,col){
+		var output = [];
+		data.forEach(function(row,i){
+			if(i>1){
+				output.push(row[col.number]);
+			}
+		});
+		return output;
+	},
+
+	getDistinct: function(values){
+		var output = [];
+		values.forEach(function(v,i){
+			if(output.indexOf(v)==-1){
+				output.push(v);
+			}
+		});
+		return output;
+	}	
 }
