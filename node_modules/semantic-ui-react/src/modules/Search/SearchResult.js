@@ -7,7 +7,6 @@ import {
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   useKeyOnly,
 } from '../../lib'
 
@@ -19,7 +18,11 @@ import {
 // Note: To avoid requiring a wrapping div, we return an array here so to
 // prevent rendering issues each node needs a unique key.
 const defaultRenderer = ({ image, price, title, description }) => [
-  image && <div key='image' className='image'>{createHTMLImage(image)}</div>,
+  image && (
+    <div key='image' className='image'>
+      {createHTMLImage(image, { autoGenerateKey: false })}
+    </div>
+  ),
   <div key='content' className='content'>
     {price && <div className='price'>{price}</div>}
     {title && <div className='title'>{title}</div>}
@@ -38,11 +41,14 @@ export default class SearchResult extends Component {
     /** Additional classes. */
     className: PropTypes.string,
 
+    /** Shorthand for primary content. */
+    content: customPropTypes.contentShorthand,
+
     /** Additional text with less emphasis. */
     description: PropTypes.string,
 
     /** A unique identifier. */
-    id: PropTypes.number,
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 
     /** Add an image to the item. */
     image: PropTypes.string,
@@ -67,7 +73,7 @@ export default class SearchResult extends Component {
     renderer: PropTypes.func,
 
     /** Display title. */
-    title: PropTypes.string,
+    title: PropTypes.string.isRequired,
   }
 
   static defaultProps = {
@@ -80,24 +86,10 @@ export default class SearchResult extends Component {
     if (onClick) onClick(e, this.props)
   }
 
-  static _meta = {
-    name: 'SearchResult',
-    parent: 'Search',
-    type: META.TYPES.MODULE,
-  }
-
   render() {
-    const {
-      active,
-      className,
-      renderer,
-    } = this.props
+    const { active, className, renderer } = this.props
 
-    const classes = cx(
-      useKeyOnly(active, 'active'),
-      'result',
-      className,
-    )
+    const classes = cx(useKeyOnly(active, 'active'), 'result', className)
     const rest = getUnhandledProps(SearchResult, this.props)
     const ElementType = getElementType(SearchResult, this.props)
 

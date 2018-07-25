@@ -2,34 +2,23 @@ import cx from 'classnames'
 import PropTypes from 'prop-types'
 import React from 'react'
 
-import {
-  customPropTypes,
-  getElementType,
-  getUnhandledProps,
-  META,
-} from '../../lib'
+import { childrenUtils, customPropTypes, getElementType, getUnhandledProps } from '../../lib'
 
 /**
  * A menu can contain a sub menu.
  */
 function MenuMenu(props) {
-  const { children, className, position } = props
+  const { children, className, content, position } = props
 
-  const classes = cx(
-    position,
-    'menu',
-    className,
-  )
+  const classes = cx(position, 'menu', className)
   const rest = getUnhandledProps(MenuMenu, props)
   const ElementType = getElementType(MenuMenu, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
-
-MenuMenu._meta = {
-  name: 'MenuMenu',
-  type: META.TYPES.COLLECTION,
-  parent: 'Menu',
+  return (
+    <ElementType {...rest} className={classes}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
+  )
 }
 
 MenuMenu.propTypes = {
@@ -41,6 +30,9 @@ MenuMenu.propTypes = {
 
   /** Additional classes. */
   className: PropTypes.string,
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 
   /** A sub menu can take left or right position. */
   position: PropTypes.oneOf(['left', 'right']),

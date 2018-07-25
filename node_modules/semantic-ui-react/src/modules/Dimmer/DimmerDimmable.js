@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   useKeyOnly,
 } from '../../lib'
 
@@ -14,12 +14,7 @@ import {
  * A dimmable sub-component for Dimmer.
  */
 function DimmerDimmable(props) {
-  const {
-    blurring,
-    className,
-    children,
-    dimmed,
-  } = props
+  const { blurring, className, children, content, dimmed } = props
 
   const classes = cx(
     useKeyOnly(blurring, 'blurring'),
@@ -30,13 +25,11 @@ function DimmerDimmable(props) {
   const rest = getUnhandledProps(DimmerDimmable, props)
   const ElementType = getElementType(DimmerDimmable, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
-
-DimmerDimmable._meta = {
-  name: 'DimmerDimmable',
-  type: META.TYPES.MODULE,
-  parent: 'Dimmer',
+  return (
+    <ElementType {...rest} className={classes}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
+  )
 }
 
 DimmerDimmable.propTypes = {
@@ -51,6 +44,9 @@ DimmerDimmable.propTypes = {
 
   /** Additional classes. */
   className: PropTypes.string,
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 
   /** Controls whether or not the dim is displayed. */
   dimmed: PropTypes.bool,

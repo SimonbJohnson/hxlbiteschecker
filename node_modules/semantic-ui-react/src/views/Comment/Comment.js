@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   useKeyOnly,
 } from '../../lib'
 import CommentAction from './CommentAction'
@@ -22,22 +22,17 @@ import CommentText from './CommentText'
  * A comment displays user feedback to site content.
  */
 function Comment(props) {
-  const { className, children, collapsed } = props
+  const { className, children, collapsed, content } = props
 
-  const classes = cx(
-    useKeyOnly(collapsed, 'collapsed'),
-    'comment',
-    className,
-  )
+  const classes = cx(useKeyOnly(collapsed, 'collapsed'), 'comment', className)
   const rest = getUnhandledProps(Comment, props)
   const ElementType = getElementType(Comment, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
-
-Comment._meta = {
-  name: 'Comment',
-  type: META.TYPES.VIEW,
+  return (
+    <ElementType {...rest} className={classes}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
+  )
 }
 
 Comment.propTypes = {
@@ -52,6 +47,9 @@ Comment.propTypes = {
 
   /** Comment can be collapsed, or hidden from view. */
   collapsed: PropTypes.bool,
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 }
 
 Comment.Author = CommentAuthor

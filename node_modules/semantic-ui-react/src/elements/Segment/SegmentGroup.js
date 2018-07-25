@@ -4,10 +4,10 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   SUI,
   useKeyOnly,
 } from '../../lib'
@@ -16,16 +16,7 @@ import {
  * A group of segments can be formatted to appear together.
  */
 function SegmentGroup(props) {
-  const {
-    children,
-    className,
-    compact,
-    horizontal,
-    piled,
-    raised,
-    size,
-    stacked,
-  } = props
+  const { children, className, compact, content, horizontal, piled, raised, size, stacked } = props
 
   const classes = cx(
     'ui',
@@ -41,13 +32,11 @@ function SegmentGroup(props) {
   const rest = getUnhandledProps(SegmentGroup, props)
   const ElementType = getElementType(SegmentGroup, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
-
-SegmentGroup._meta = {
-  name: 'SegmentGroup',
-  parent: 'Segment',
-  type: META.TYPES.ELEMENT,
+  return (
+    <ElementType {...rest} className={classes}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
+  )
 }
 
 SegmentGroup.propTypes = {
@@ -62,6 +51,9 @@ SegmentGroup.propTypes = {
 
   /** A segment may take up only as much space as is necessary. */
   compact: PropTypes.bool,
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 
   /** Formats content to be aligned horizontally. */
   horizontal: PropTypes.bool,

@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   useKeyOnly,
 } from '../../lib'
 
@@ -14,13 +14,7 @@ import {
  * An ad displays third-party promotional content.
  */
 function Advertisement(props) {
-  const {
-    centered,
-    children,
-    className,
-    test,
-    unit,
-  } = props
+  const { centered, children, className, content, test, unit } = props
 
   const classes = cx(
     'ui',
@@ -33,12 +27,11 @@ function Advertisement(props) {
   const rest = getUnhandledProps(Advertisement, props)
   const ElementType = getElementType(Advertisement, props)
 
-  return <ElementType {...rest} className={classes} data-text={test}>{children}</ElementType>
-}
-
-Advertisement._meta = {
-  name: 'Advertisement',
-  type: META.TYPES.VIEW,
+  return (
+    <ElementType {...rest} className={classes} data-text={test}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
+  )
 }
 
 Advertisement.propTypes = {
@@ -54,26 +47,38 @@ Advertisement.propTypes = {
   /** Additional classes. */
   className: PropTypes.string,
 
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
+
   /** Text to be displayed on the advertisement. */
-  test: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.number,
-    PropTypes.string,
-  ]),
+  test: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.string]),
 
   /** Varies the size of the advertisement. */
   unit: PropTypes.oneOf([
-    'medium rectangle', 'large rectangle', 'vertical rectangle', 'small rectangle',
-    'mobile banner', 'banner', 'vertical banner', 'top banner', 'half banner',
-    'button', 'square button', 'small button',
-    'skyscraper', 'wide skyscraper',
-    'leaderboard', 'large leaderboard', 'mobile leaderboard', 'billboard',
+    'medium rectangle',
+    'large rectangle',
+    'vertical rectangle',
+    'small rectangle',
+    'mobile banner',
+    'banner',
+    'vertical banner',
+    'top banner',
+    'half banner',
+    'button',
+    'square button',
+    'small button',
+    'skyscraper',
+    'wide skyscraper',
+    'leaderboard',
+    'large leaderboard',
+    'mobile leaderboard',
+    'billboard',
     'panorama',
     'netboard',
     'half page',
-    'square', 'small square',
+    'square',
+    'small square',
   ]).isRequired,
-
 }
 
 export default Advertisement

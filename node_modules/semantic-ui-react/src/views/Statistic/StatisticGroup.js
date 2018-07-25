@@ -8,7 +8,6 @@ import {
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   SUI,
   useKeyOnly,
   useWidthProp,
@@ -19,16 +18,7 @@ import Statistic from './Statistic'
  * A group of statistics.
  */
 function StatisticGroup(props) {
-  const {
-    children,
-    className,
-    color,
-    horizontal,
-    inverted,
-    items,
-    size,
-    widths,
-  } = props
+  const { children, className, color, content, horizontal, inverted, items, size, widths } = props
 
   const classes = cx(
     'ui',
@@ -43,19 +33,26 @@ function StatisticGroup(props) {
   const rest = getUnhandledProps(StatisticGroup, props)
   const ElementType = getElementType(StatisticGroup, props)
 
-  if (!childrenUtils.isNil(children)) return <ElementType {...rest} className={classes}>{children}</ElementType>
+  if (!childrenUtils.isNil(children)) {
+    return (
+      <ElementType {...rest} className={classes}>
+        {children}
+      </ElementType>
+    )
+  }
+  if (!childrenUtils.isNil(content)) {
+    return (
+      <ElementType {...rest} className={classes}>
+        {content}
+      </ElementType>
+    )
+  }
 
-  const itemsJSX = _.map(items, item => (
-    <Statistic key={item.childKey || [item.label, item.title].join('-')} {...item} />
-  ))
-
-  return <ElementType {...rest} className={classes}>{itemsJSX}</ElementType>
-}
-
-StatisticGroup._meta = {
-  name: 'StatisticGroup',
-  type: META.TYPES.VIEW,
-  parent: 'Statistic',
+  return (
+    <ElementType {...rest} className={classes}>
+      {_.map(items, item => Statistic.create(item))}
+    </ElementType>
+  )
 }
 
 StatisticGroup.propTypes = {
@@ -70,6 +67,9 @@ StatisticGroup.propTypes = {
 
   /** A statistic group can be formatted to be different colors. */
   color: PropTypes.oneOf(SUI.COLORS),
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 
   /** A statistic group can present its measurement horizontally. */
   horizontal: PropTypes.bool,

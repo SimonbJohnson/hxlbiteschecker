@@ -6,12 +6,10 @@ import {
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   SUI,
   useKeyOnly,
-  useOnlyProp,
+  useMultipleProp,
   useTextAlignProp,
-  useValueAndKey,
   useVerticalAlignProp,
   useWidthProp,
 } from '../../lib'
@@ -39,9 +37,9 @@ function GridRow(props) {
     useKeyOnly(centered, 'centered'),
     useKeyOnly(divided, 'divided'),
     useKeyOnly(stretched, 'stretched'),
-    useOnlyProp(only),
+    useMultipleProp(only, 'only'),
+    useMultipleProp(reversed, 'reversed'),
     useTextAlignProp(textAlign),
-    useValueAndKey(reversed, 'reversed'),
     useVerticalAlignProp(verticalAlign),
     useWidthProp(columns, 'column', true),
     'row',
@@ -50,13 +48,11 @@ function GridRow(props) {
   const rest = getUnhandledProps(GridRow, props)
   const ElementType = getElementType(GridRow, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
-
-GridRow._meta = {
-  name: 'GridRow',
-  parent: 'Grid',
-  type: META.TYPES.COLLECTION,
+  return (
+    <ElementType {...rest} className={classes}>
+      {children}
+    </ElementType>
+  )
 }
 
 GridRow.propTypes = {
@@ -82,11 +78,16 @@ GridRow.propTypes = {
   divided: PropTypes.bool,
 
   /** A row can appear only for a specific device, or screen sizes. */
-  only: customPropTypes.onlyProp(SUI.VISIBILITY),
+  only: customPropTypes.multipleProp(SUI.VISIBILITY),
 
   /** A row can specify that its columns should reverse order at different device sizes. */
-  reversed: PropTypes.oneOf([
-    'computer', 'computer vertically', 'mobile', 'mobile vertically', 'tablet', 'tablet vertically',
+  reversed: customPropTypes.multipleProp([
+    'computer',
+    'computer vertically',
+    'mobile',
+    'mobile vertically',
+    'tablet',
+    'tablet vertically',
   ]),
 
   /** A row can stretch its contents to take up the entire column height. */

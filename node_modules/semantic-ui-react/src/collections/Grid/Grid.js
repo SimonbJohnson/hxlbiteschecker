@@ -6,12 +6,11 @@ import {
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   SUI,
   useKeyOnly,
   useKeyOrValueAndKey,
+  useMultipleProp,
   useTextAlignProp,
-  useValueAndKey,
   useVerticalAlignProp,
   useWidthProp,
 } from '../../lib'
@@ -53,8 +52,8 @@ function Grid(props) {
     useKeyOrValueAndKey(divided, 'divided'),
     useKeyOrValueAndKey(padded, 'padded'),
     useKeyOrValueAndKey(relaxed, 'relaxed'),
+    useMultipleProp(reversed, 'reversed'),
     useTextAlignProp(textAlign),
-    useValueAndKey(reversed, 'reversed'),
     useVerticalAlignProp(verticalAlign),
     useWidthProp(columns, 'column', true),
     'grid',
@@ -63,26 +62,22 @@ function Grid(props) {
   const rest = getUnhandledProps(Grid, props)
   const ElementType = getElementType(Grid, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
+  return (
+    <ElementType {...rest} className={classes}>
+      {children}
+    </ElementType>
+  )
 }
 
 Grid.Column = GridColumn
 Grid.Row = GridRow
-
-Grid._meta = {
-  name: 'Grid',
-  type: META.TYPES.COLLECTION,
-}
 
 Grid.propTypes = {
   /** An element type to render as (string or function). */
   as: customPropTypes.as,
 
   /** A grid can have rows divided into cells. */
-  celled: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.oneOf(['internally']),
-  ]),
+  celled: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['internally'])]),
 
   /** A grid can have its columns centered. */
   centered: PropTypes.bool,
@@ -100,10 +95,7 @@ Grid.propTypes = {
   container: PropTypes.bool,
 
   /** A grid can have dividers between its columns. */
-  divided: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.oneOf(['vertically']),
-  ]),
+  divided: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['vertically'])]),
 
   /** A grid can double its column width on tablet and mobile sizes. */
   doubling: PropTypes.bool,
@@ -112,20 +104,19 @@ Grid.propTypes = {
   inverted: PropTypes.bool,
 
   /** A grid can preserve its vertical and horizontal gutters on first and last columns. */
-  padded: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.oneOf(['horizontally', 'vertically']),
-  ]),
+  padded: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['horizontally', 'vertically'])]),
 
   /** A grid can increase its gutters to allow for more negative space. */
-  relaxed: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.oneOf(['very']),
-  ]),
+  relaxed: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
 
   /** A grid can specify that its columns should reverse order at different device sizes. */
-  reversed: PropTypes.oneOf([
-    'computer', 'computer vertically', 'mobile', 'mobile vertically', 'tablet', 'tablet vertically',
+  reversed: customPropTypes.multipleProp([
+    'computer',
+    'computer vertically',
+    'mobile',
+    'mobile vertically',
+    'tablet',
+    'tablet vertically',
   ]),
 
   /** A grid can have its columns stack on-top of each other after reaching mobile breakpoints. */

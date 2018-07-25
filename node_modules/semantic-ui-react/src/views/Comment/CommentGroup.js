@@ -4,10 +4,10 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   SUI,
   useKeyOnly,
 } from '../../lib'
@@ -16,14 +16,7 @@ import {
  * Comments can be grouped.
  */
 function CommentGroup(props) {
-  const {
-    className,
-    children,
-    collapsed,
-    minimal,
-    size,
-    threaded,
-  } = props
+  const { className, children, collapsed, content, minimal, size, threaded } = props
 
   const classes = cx(
     'ui',
@@ -37,13 +30,11 @@ function CommentGroup(props) {
   const rest = getUnhandledProps(CommentGroup, props)
   const ElementType = getElementType(CommentGroup, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
-
-CommentGroup._meta = {
-  name: 'CommentGroup',
-  parent: 'Comment',
-  type: META.TYPES.VIEW,
+  return (
+    <ElementType {...rest} className={classes}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
+  )
 }
 
 CommentGroup.propTypes = {
@@ -58,6 +49,9 @@ CommentGroup.propTypes = {
 
   /** Comments can be collapsed, or hidden from view. */
   collapsed: PropTypes.bool,
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 
   /** Comments can hide extra information unless a user shows intent to interact with a comment. */
   minimal: PropTypes.bool,

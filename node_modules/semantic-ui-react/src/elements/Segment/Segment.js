@@ -4,10 +4,10 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   SUI,
   useKeyOnly,
   useKeyOrValueAndKey,
@@ -29,6 +29,7 @@ function Segment(props) {
     clearing,
     color,
     compact,
+    content,
     disabled,
     floated,
     inverted,
@@ -71,25 +72,21 @@ function Segment(props) {
   const rest = getUnhandledProps(Segment, props)
   const ElementType = getElementType(Segment, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
+  return (
+    <ElementType {...rest} className={classes}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
+  )
 }
 
 Segment.Group = SegmentGroup
-
-Segment._meta = {
-  name: 'Segment',
-  type: META.TYPES.ELEMENT,
-}
 
 Segment.propTypes = {
   /** An element type to render as (string or function). */
   as: customPropTypes.as,
 
   /** Attach segment to other content, like a header. */
-  attached: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.oneOf(['top', 'bottom']),
-  ]),
+  attached: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['top', 'bottom'])]),
 
   /** A basic segment has no special formatting. */
   basic: PropTypes.bool,
@@ -112,6 +109,9 @@ Segment.propTypes = {
   /** A segment may take up only as much space as is necessary. */
   compact: PropTypes.bool,
 
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
+
   /** A segment may show its content is disabled. */
   disabled: PropTypes.bool,
 
@@ -125,10 +125,7 @@ Segment.propTypes = {
   loading: PropTypes.bool,
 
   /** A segment can increase its padding. */
-  padded: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.oneOf(['very']),
-  ]),
+  padded: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
 
   /** Formatted to look like a pile of pages. */
   piled: PropTypes.bool,

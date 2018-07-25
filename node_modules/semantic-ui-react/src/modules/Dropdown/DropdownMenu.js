@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   useKeyOnly,
 } from '../../lib'
 
@@ -14,8 +14,10 @@ import {
  * A dropdown menu can contain a menu.
  */
 function DropdownMenu(props) {
-  const { children, className, scrolling } = props
+  const { children, className, content, direction, open, scrolling } = props
   const classes = cx(
+    direction,
+    useKeyOnly(open, 'visible'),
     useKeyOnly(scrolling, 'scrolling'),
     'menu transition',
     className,
@@ -23,13 +25,11 @@ function DropdownMenu(props) {
   const rest = getUnhandledProps(DropdownMenu, props)
   const ElementType = getElementType(DropdownMenu, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
-
-DropdownMenu._meta = {
-  name: 'DropdownMenu',
-  parent: 'Dropdown',
-  type: META.TYPES.MODULE,
+  return (
+    <ElementType {...rest} className={classes}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
+  )
 }
 
 DropdownMenu.propTypes = {
@@ -41,6 +41,15 @@ DropdownMenu.propTypes = {
 
   /** Additional classes. */
   className: PropTypes.string,
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
+
+  /** A dropdown menu can open to the left or to the right. */
+  direction: PropTypes.oneOf(['left', 'right']),
+
+  /** Whether or not the dropdown menu is displayed. */
+  open: PropTypes.bool,
 
   /** A dropdown menu can scroll. */
   scrolling: PropTypes.bool,
