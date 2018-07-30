@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import DataInputs from './DataInputs.jsx';
 import HXLBites from './HXLBites.jsx';
-import 'semantic-ui-css/semantic.min.css';
+import 'semantic-ui-css/semantic.css';
 
 
 class App extends Component {
@@ -21,7 +21,8 @@ class App extends Component {
     return (
       <div>
         <DataInputs onLoad={this.initBites} />
-        <HXLBites data={this.state.hxlData} />
+
+        <HXLBites data={this.state.hxlData} show='charts' />
       </div>
     );
   }
