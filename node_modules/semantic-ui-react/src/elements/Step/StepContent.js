@@ -4,11 +4,10 @@ import React from 'react'
 
 import {
   childrenUtils,
-  createShorthand,
+  createShorthandFactory,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
 } from '../../lib'
 import StepDescription from './StepDescription'
 import StepTitle from './StepTitle'
@@ -17,27 +16,32 @@ import StepTitle from './StepTitle'
  * A step can contain a content.
  */
 function StepContent(props) {
-  const { children, className, description, title } = props
+  const { children, className, content, description, title } = props
   const classes = cx('content', className)
   const rest = getUnhandledProps(StepContent, props)
   const ElementType = getElementType(StepContent, props)
 
   if (!childrenUtils.isNil(children)) {
-    return <ElementType {...rest} className={classes}>{children}</ElementType>
+    return (
+      <ElementType {...rest} className={classes}>
+        {children}
+      </ElementType>
+    )
+  }
+  if (!childrenUtils.isNil(content)) {
+    return (
+      <ElementType {...rest} className={classes}>
+        {content}
+      </ElementType>
+    )
   }
 
   return (
     <ElementType {...rest} className={classes}>
-      {createShorthand(StepTitle, val => ({ title: val }), title)}
-      {createShorthand(StepDescription, val => ({ description: val }), description)}
+      {StepTitle.create(title, { autoGenerateKey: false })}
+      {StepDescription.create(description, { autoGenerateKey: false })}
     </ElementType>
   )
-}
-
-StepContent._meta = {
-  name: 'StepContent',
-  parent: 'Step',
-  type: META.TYPES.ELEMENT,
 }
 
 StepContent.propTypes = {
@@ -50,11 +54,16 @@ StepContent.propTypes = {
   /** Additional classes. */
   className: PropTypes.string,
 
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
+
   /** Shorthand for StepDescription. */
   description: customPropTypes.itemShorthand,
 
   /** Shorthand for StepTitle. */
   title: customPropTypes.itemShorthand,
 }
+
+StepContent.create = createShorthandFactory(StepContent, content => ({ content }))
 
 export default StepContent

@@ -3,37 +3,25 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   useKeyOnly,
 } from '../../lib'
 
 function SearchCategory(props) {
-  const { active, children, className, renderer } = props
-  const classes = cx(
-    useKeyOnly(active, 'active'),
-    'category',
-    className,
-  )
+  const { active, children, className, content, renderer } = props
+  const classes = cx(useKeyOnly(active, 'active'), 'category', className)
   const rest = getUnhandledProps(SearchCategory, props)
   const ElementType = getElementType(SearchCategory, props)
 
   return (
     <ElementType {...rest} className={classes}>
-      <div className='name'>
-        {renderer(props)}
-      </div>
-      {children}
+      <div className='name'>{renderer(props)}</div>
+      <div className='results'>{childrenUtils.isNil(children) ? content : children}</div>
     </ElementType>
   )
-}
-
-SearchCategory._meta = {
-  name: 'SearchCategory',
-  parent: 'Search',
-  type: META.TYPES.MODULE,
 }
 
 SearchCategory.defaultProps = {
@@ -52,6 +40,9 @@ SearchCategory.propTypes = {
 
   /** Additional classes. */
   className: PropTypes.string,
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 
   /** Display name. */
   name: PropTypes.string,

@@ -18,7 +18,6 @@ class SimpleMap extends Component {
       this.createMap()
    }
    createMap() {
-
       let self = this;
       const node = this.node
       let maxValue = 0;
@@ -33,7 +32,7 @@ class SimpleMap extends Component {
 
       var svg = select(node)
           .append('g');
-
+          console.log(this.props.width);
       var projection = geoMercator()
           .center([0, 0])
           .scale(this.props.width/6)
@@ -58,34 +57,37 @@ class SimpleMap extends Component {
          .attr("stroke","#ffffff")
          .attr("stroke-width","0.5px")
          .attr('id',function(d){
-            return 'country'+d.properties[self.props.attribute];
+            return self.props.uniqueKey+d.properties[self.props.attribute];
          });
          let bound = [];
          let set = false;
-         for (key in this.props.codes){
-            let geom = select('#country'+key)
-            if(!geom.empty()){
-               let bounds = geom.node().getBBox();
-               if(!set){
-                  bound = [bounds.x,bounds.y,bounds.x+bounds.width,bounds.y+bounds.height];
-                  set = true;
-               } else {
-                  if(bound[0]>bounds.x){
-                     bound[0] = bounds.x;
+         let heading = 0;
+         /*for (key in this.props.codes){
+            if(heading>0){
+               let geom = select('#'+self.props.uniqueKey+key)
+               if(!geom.empty()){
+                  let bounds = path.bounds(geom.data().geometry);
+                  if(!set){
+                     bound = [bounds.x,bounds.y,bounds.x+bounds.width,bounds.y+bounds.height];
+                     set = true;
+                  } else {
+                     if(bound[0]>bounds.x){
+                        bound[0] = bounds.x;
+                     }
+                     if(bound[1]>bounds.y){
+                        bound[1] = bounds.y;
+                     }
+                     if(bound[2]<bounds.x+bounds.width){
+                        bound[2] = bounds.x+bounds.width;
+                     }
+                     if(bound[3]<bounds.y+bounds.height){
+                        bound[3] = bounds.y+bounds.height;
+                     }                  
                   }
-                  if(bound[1]>bounds.y){
-                     bound[1] = bounds.y;
-                  }
-                  if(bound[2]<bounds.x+bounds.width){
-                     bound[2] = bounds.x+bounds.width;
-                  }
-                  if(bound[3]<bounds.y+bounds.height){
-                     bound[3] = bounds.y+bounds.height;
-                  }                  
                }
             }
+            heading++;
          };
-      
          let dx = (bound[2]-bound[0]);
          let dy = (bound[3]-bound[1]);
          let x = bound[0]+dx/2;
@@ -95,9 +97,9 @@ class SimpleMap extends Component {
             scale = 1;
          }
          let translate = [this.props.width / 2 - scale * (x), this.props.height / 2 - scale * (y)];
-
-      svg.attr("transform", "translate(" + translate + ")scale(" + scale + ")");
-      svg.selectAll("path").attr("stroke-width",(0.5/scale)+"px")
+      */
+      //svg.attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+      //svg.selectAll("path").attr("stroke-width",(0.5/scale)+"px")
    }
 
    render() {

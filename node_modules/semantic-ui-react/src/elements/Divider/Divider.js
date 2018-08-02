@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   useKeyOnly,
 } from '../../lib'
 
@@ -18,6 +18,7 @@ function Divider(props) {
     children,
     className,
     clearing,
+    content,
     fitted,
     hidden,
     horizontal,
@@ -41,12 +42,11 @@ function Divider(props) {
   const rest = getUnhandledProps(Divider, props)
   const ElementType = getElementType(Divider, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
-
-Divider._meta = {
-  name: 'Divider',
-  type: META.TYPES.ELEMENT,
+  return (
+    <ElementType {...rest} className={classes}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
+  )
 }
 
 Divider.propTypes = {
@@ -62,6 +62,9 @@ Divider.propTypes = {
   /** Divider can clear the content above it. */
   clearing: PropTypes.bool,
 
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
+
   /** Divider can be fitted without any space above or below it. */
   fitted: PropTypes.bool,
 
@@ -71,7 +74,7 @@ Divider.propTypes = {
   /** Divider can segment content horizontally. */
   horizontal: PropTypes.bool,
 
-  /** Divider can have it's colours inverted. */
+  /** Divider can have its colours inverted. */
   inverted: PropTypes.bool,
 
   /** Divider can provide greater margins to divide sections of content. */

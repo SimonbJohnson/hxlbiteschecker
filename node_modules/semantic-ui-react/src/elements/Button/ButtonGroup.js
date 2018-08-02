@@ -1,17 +1,20 @@
 import cx from 'classnames'
+import _ from 'lodash'
 import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   SUI,
   useKeyOnly,
+  useKeyOrValueAndKey,
   useValueAndKey,
   useWidthProp,
 } from '../../lib'
+import Button from './Button'
 
 /**
  * Buttons can be grouped.
@@ -20,10 +23,12 @@ function ButtonGroup(props) {
   const {
     attached,
     basic,
+    buttons,
     children,
     className,
     color,
     compact,
+    content,
     floated,
     fluid,
     icon,
@@ -55,7 +60,7 @@ function ButtonGroup(props) {
     useKeyOnly(secondary, 'secondary'),
     useKeyOnly(toggle, 'toggle'),
     useKeyOnly(vertical, 'vertical'),
-    useValueAndKey(attached, 'attached'),
+    useKeyOrValueAndKey(attached, 'attached'),
     useValueAndKey(floated, 'floated'),
     useWidthProp(widths),
     'buttons',
@@ -64,24 +69,36 @@ function ButtonGroup(props) {
   const rest = getUnhandledProps(ButtonGroup, props)
   const ElementType = getElementType(ButtonGroup, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
+  if (_.isNil(buttons)) {
+    return (
+      <ElementType {...rest} className={classes}>
+        {childrenUtils.isNil(children) ? content : children}
+      </ElementType>
+    )
+  }
 
-ButtonGroup._meta = {
-  name: 'ButtonGroup',
-  parent: 'Button',
-  type: META.TYPES.ELEMENT,
+  return (
+    <ElementType {...rest} className={classes}>
+      {_.map(buttons, button => Button.create(button))}
+    </ElementType>
+  )
 }
 
 ButtonGroup.propTypes = {
   /** An element type to render as (string or function). */
   as: customPropTypes.as,
 
-  /** A button can be attached to the top or bottom of other content. */
-  attached: PropTypes.oneOf(['left', 'right', 'top', 'bottom']),
+  /** Groups can be attached to other content. */
+  attached: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.oneOf(['left', 'right', 'top', 'bottom']),
+  ]),
 
   /** Groups can be less pronounced. */
   basic: PropTypes.bool,
+
+  /** Array of shorthand Button values. */
+  buttons: customPropTypes.collectionShorthand,
 
   /** Primary content. */
   children: PropTypes.node,
@@ -94,6 +111,9 @@ ButtonGroup.propTypes = {
 
   /** Groups can reduce their padding to fit into tighter spaces. */
   compact: PropTypes.bool,
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 
   /** Groups can be aligned to the left or right of its container. */
   floated: PropTypes.oneOf(SUI.FLOATS),

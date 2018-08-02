@@ -4,10 +4,10 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   SUI,
   useKeyOnly,
   useKeyOrValueAndKey,
@@ -22,6 +22,7 @@ function Rail(props) {
     children,
     className,
     close,
+    content,
     dividing,
     internal,
     position,
@@ -42,12 +43,11 @@ function Rail(props) {
   const rest = getUnhandledProps(Rail, props)
   const ElementType = getElementType(Rail, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
-
-Rail._meta = {
-  name: 'Rail',
-  type: META.TYPES.ELEMENT,
+  return (
+    <ElementType {...rest} className={classes}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
+  )
 }
 
 Rail.propTypes = {
@@ -64,10 +64,10 @@ Rail.propTypes = {
   className: PropTypes.string,
 
   /** A rail can appear closer to the main viewport. */
-  close: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.oneOf(['very']),
-  ]),
+  close: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 
   /** A rail can create a division between itself and a container. */
   dividing: PropTypes.bool,

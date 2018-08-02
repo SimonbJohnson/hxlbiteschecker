@@ -8,7 +8,6 @@ import {
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   useKeyOnly,
   useKeyOrValueAndKey,
 } from '../../lib'
@@ -18,15 +17,7 @@ import Item from './Item'
  * A group of items.
  */
 function ItemGroup(props) {
-  const {
-    children,
-    className,
-    divided,
-    items,
-    link,
-    relaxed,
-    unstackable,
-  } = props
+  const { children, className, content, divided, items, link, relaxed, unstackable } = props
 
   const classes = cx(
     'ui',
@@ -41,23 +32,34 @@ function ItemGroup(props) {
   const ElementType = getElementType(ItemGroup, props)
 
   if (!childrenUtils.isNil(children)) {
-    return <ElementType {...rest} className={classes}>{children}</ElementType>
+    return (
+      <ElementType {...rest} className={classes}>
+        {children}
+      </ElementType>
+    )
+  }
+  if (!childrenUtils.isNil(content)) {
+    return (
+      <ElementType {...rest} className={classes}>
+        {content}
+      </ElementType>
+    )
   }
 
   const itemsJSX = _.map(items, (item) => {
     const { childKey, ...itemProps } = item
-    const finalKey = childKey || [itemProps.content, itemProps.description, itemProps.header, itemProps.meta].join('-')
+    const finalKey =
+      childKey ||
+      [itemProps.content, itemProps.description, itemProps.header, itemProps.meta].join('-')
 
     return <Item {...itemProps} key={finalKey} />
   })
 
-  return <ElementType {...rest} className={classes}>{itemsJSX}</ElementType>
-}
-
-ItemGroup._meta = {
-  name: 'ItemGroup',
-  type: META.TYPES.VIEW,
-  parent: 'Item',
+  return (
+    <ElementType {...rest} className={classes}>
+      {itemsJSX}
+    </ElementType>
+  )
 }
 
 ItemGroup.propTypes = {
@@ -70,6 +72,9 @@ ItemGroup.propTypes = {
   /** Additional classes. */
   className: PropTypes.string,
 
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
+
   /** Items can be divided to better distinguish between grouped content. */
   divided: PropTypes.bool,
 
@@ -80,10 +85,7 @@ ItemGroup.propTypes = {
   link: PropTypes.bool,
 
   /** A group of items can relax its padding to provide more negative space. */
-  relaxed: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.oneOf(['very']),
-  ]),
+  relaxed: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
 
   /** Prevent items from stacking on mobile. */
   unstackable: PropTypes.bool,

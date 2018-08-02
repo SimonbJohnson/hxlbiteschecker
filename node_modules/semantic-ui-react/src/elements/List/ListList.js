@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   useKeyOnly,
 } from '../../lib'
 
@@ -14,22 +14,17 @@ import {
  * A list can contain a sub list.
  */
 function ListList(props) {
-  const { children, className } = props
+  const { children, className, content } = props
 
   const rest = getUnhandledProps(ListList, props)
   const ElementType = getElementType(ListList, props)
-  const classes = cx(
-    useKeyOnly(ElementType !== 'ul' && ElementType !== 'ol', 'list'),
-    className,
+  const classes = cx(useKeyOnly(ElementType !== 'ul' && ElementType !== 'ol', 'list'), className)
+
+  return (
+    <ElementType {...rest} className={classes}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
   )
-
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
-
-ListList._meta = {
-  name: 'ListList',
-  parent: 'List',
-  type: META.TYPES.ELEMENT,
 }
 
 ListList.propTypes = {
@@ -41,6 +36,9 @@ ListList.propTypes = {
 
   /** Additional classes. */
   className: PropTypes.string,
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 }
 
 export default ListList

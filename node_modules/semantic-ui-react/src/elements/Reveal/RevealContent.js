@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import {
+  childrenUtils,
   customPropTypes,
   getElementType,
   getUnhandledProps,
-  META,
   useKeyOnly,
 } from '../../lib'
 
@@ -14,12 +14,7 @@ import {
  * A content sub-component for the Reveal.
  */
 function RevealContent(props) {
-  const {
-    children,
-    className,
-    hidden,
-    visible,
-  } = props
+  const { children, className, content, hidden, visible } = props
 
   const classes = cx(
     'ui',
@@ -31,13 +26,11 @@ function RevealContent(props) {
   const rest = getUnhandledProps(RevealContent, props)
   const ElementType = getElementType(RevealContent, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
-}
-
-RevealContent._meta = {
-  name: 'RevealContent',
-  parent: 'Reveal',
-  type: META.TYPES.ELEMENT,
+  return (
+    <ElementType {...rest} className={classes}>
+      {childrenUtils.isNil(children) ? content : children}
+    </ElementType>
+  )
 }
 
 RevealContent.propTypes = {
@@ -49,6 +42,9 @@ RevealContent.propTypes = {
 
   /** Additional classes. */
   className: PropTypes.string,
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 
   /** A reveal may contain content that is visible before interaction. */
   hidden: PropTypes.bool,
