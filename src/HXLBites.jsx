@@ -34,6 +34,7 @@ class HXLBites extends Component {
     let mapBites = [];
     let tableBites = [];
     let crossTableBites = [];
+    let lineBites = [];
 
     if(this.props.data!=null){
       console.log(this.props.data);
@@ -43,17 +44,39 @@ class HXLBites extends Component {
       });
 
       chartBites = hxlBites.getChartBites();
+
       chartBites.sort(function(a,b){
         return b.priority > a.priority;
       });
+
       chartBites.forEach(function(bite){
         bite.bite = self.getNamedArray(bite.bite)
       });
+
+      lineBites = hxlBites.getTimeSeriesBites();
+
+      lineBites.sort(function(a,b){
+        return b.priority > a.priority;
+      });
+
+      lineBites.forEach(function(bite){
+        bite.bite = self.getNamedArray(bite.bite)
+        bite.bite.forEach(function(d){
+          d['name'] = d['name'].getTime ();
+        });
+      });
+
+      console.log(lineBites);
+
+      chartBites = lineBites.concat(chartBites);
+
       mapBites = hxlBites.getMapBites();
+
       tableBites = hxlBites.getTableBites();
       tableBites.forEach(function(bite){
         bite.html = hxlBites.render(null,bite);
       });
+
       crossTableBites = hxlBites.getCrossTableBites();
       crossTableBites.forEach(function(bite){
         bite.html = hxlBites.render(null,bite);

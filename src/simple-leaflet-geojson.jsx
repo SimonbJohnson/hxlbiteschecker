@@ -29,27 +29,32 @@ class SimpleMap extends Component {
     }
     let colorLength = self.props.colors.length;    
 
-    var getColor = function(feature){
-    	let featureCode = feature.properties[self.props.attribute];
 
-			if(isNaN(self.props.codes[featureCode])){
-        return '#cccccc'
-      } else {
-        let value = self.props.codes[featureCode];
-        let index = Math.ceil(value/maxValue*(colorLength-1));
-        return self.props.colors[index];
+    function styleClosure(att){
+
+      var getColor = function(feature){
+        let featureCode = feature.properties[att];
+
+        if(isNaN(self.props.codes[featureCode])){
+          return '#cccccc'
+        } else {
+          let value = self.props.codes[featureCode];
+          let index = Math.ceil(value/maxValue*(colorLength-1));
+          return self.props.colors[index];
+        }
       }
-    }
 
-    var style = function(feature){
-    	return{
-        className: self.props.uniqueKey+feature.properties[self.props.attribute],
-	      weight: 1,
-	      opacity: 1,
-	      color: getColor(feature),
-	      dashArray: '3',
-	      fillOpacity: 0.7
-	    }
+
+      return function(feature){
+      	return{
+          className: self.props.uniqueKey+feature.properties[att],
+  	      weight: 1,
+  	      opacity: 1,
+  	      color: getColor(feature),
+  	      dashArray: '3',
+  	      fillOpacity: 0.7
+  	    }
+      }
     }
 
     var info = L.control();
@@ -73,29 +78,34 @@ class SimpleMap extends Component {
 
     info.addTo(this.map);
 
-    function onEachFeature(feature, layer) {
-        var featureCode = feature.properties[self.props.attribute];
-        if(!isNaN(self.props.codes[featureCode])){
-          bounds.push(layer.getBounds());
-        }
-        layer.on({
-            mouseover: highlightFeature,
-            mouseout: resetHighlight,
-        });
+
+    function onEachFeatureClosure(att){
+
+      function highlightFeature(e) {
+       info.update(e.target.feature.properties[att]);
+      }
+
+      function resetHighlight(e) {
+        info.update();
+      }
+
+      return function onEachFeature(feature, layer) {
+          var featureCode = feature.properties[att];
+          if(!isNaN(self.props.codes[featureCode])){
+            bounds.push(layer.getBounds());
+          }
+          layer.on({
+              mouseover: highlightFeature,
+              mouseout: resetHighlight,
+          });
+      }
     }
 
-    function highlightFeature(e) {
-       info.update(e.target.feature.properties[self.props.attribute]);
-    }
-
-    function resetHighlight(e) {
-      info.update();
-    }
     var layer
-    this.props.geom.forEach(function(g){
+    this.props.geom.forEach(function(g,i){
       layer = L.geoJSON(g,{
-        style:style,
-        onEachFeature: onEachFeature
+        style:styleClosure(self.props.attribute[i]),
+        onEachFeature: onEachFeatureClosure(self.props.attribute[i])
       }).addTo(self.map);    
     });
     var fitBound = bounds[0];

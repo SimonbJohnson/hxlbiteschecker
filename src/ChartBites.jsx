@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell} from 'recharts';
+import {LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell} from 'recharts';
 
 class Pie3WChart extends Component {
 
@@ -49,6 +49,34 @@ class Row3WChart extends Component {
   }
 }
 
+class Line3WChart extends Component {
+
+  formatXAxis(tick){
+    let labeltext = new Date(tick).toISOString().slice(0,10);
+    return labeltext;
+  }
+
+  render () {
+
+    let color = '#EF5350';
+
+    return (
+      <div className="chartbite">
+        <p>{this.props.title} - {this.props.id} - {this.props.uniqueID}</p>
+        <LineChart width={400} height={500} data={this.props.data}
+              margin={{top: 5, right: 20, left: 50, bottom: 5}} >
+         <XAxis type="number" dataKey="name" domain={['dataMin', 'dataMax']} tickFormatter={this.formatXAxis}/>
+         <YAxis />
+         <CartesianGrid strokeDasharray="3 3" />
+         <Tooltip labelFormatter={this.formatXAxis} />
+         <Legend />
+         <Line type="monotone" dataKey="value" stroke={color} dot={false}/>
+        </LineChart>
+      </div>
+    );
+  }
+}
+
 class ChartBites extends Component {
 
   render(){
@@ -58,8 +86,10 @@ class ChartBites extends Component {
       let key = 'chart'+i
       if(chart.subtype==='pie'){
         bites.push(<Pie3WChart key={key} data={chart.bite} title={chart.title} id={chart.id} uniqueID={chart.uniqueID}/>);
-      } else {
+      } else if (chart.subtype==='row') {
         bites.push(<Row3WChart key={key} data={chart.bite} title={chart.title} id={chart.id} uniqueID={chart.uniqueID}/>);
+      } else if (chart.subtype==='line') {
+        bites.push(<Line3WChart key={key} data={chart.bite} title={chart.title} id={chart.id} uniqueID={chart.uniqueID}/>);
       }
     });
 
